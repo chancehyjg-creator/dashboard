@@ -332,9 +332,7 @@
     <span>평가손익 <span class="stat-val mono" id="totalPnl">-</span></span>
     <span>수익률 <span class="stat-val mono" id="totalPnlPct">-</span></span>
     <span>보유 종목 <span class="stat-val mono" id="totalCount">-</span></span>
-    <span>기준환율(USD) <span class="stat-val mono" id="fxRateUSD">-</span></span>
-    <span>기준환율(GBP) <span class="stat-val mono" id="fxRateGBP">-</span></span>
-    <span id="fxRateDateWrap" style="display:none;">(<span class="mono" id="fxRateDate"></span> 기준)</span>
+    <span>기준환율(USD) <span class="stat-val mono" id="fxRate">-</span></span>
   </div>
 </header>
 
@@ -556,40 +554,6 @@ async function fetchFxRates(){
   }
 }
 
-// 환율 탭에서 쓰는 것과 동일한 야후 시세를 시작 시점에 미리 불러와
-// 메인 화면 기준환율 + 포트폴리오 원화환산 계산에 그대로 재사용한다.
-async function loadFxDataAtStartup(){
-  await fetchFxRates(); // 폴백/기타통화용 기준값 먼저 확보
-
-  const [usdHist, gbpHist, dxy] = await Promise.all([
-    fetchFxHistory('USD').catch(() => []),
-    fetchFxHistory('GBP').catch(() => []),
-    fetchDollarIndexHistory().catch(() => []),
-  ]);
-  fxHistoryCache.USD = usdHist;
-  fxHistoryCache.GBP = gbpHist;
-  dollarIndexHistory = dxy;
-  fxLoaded = true; // 환율 탭을 열 때 다시 불러오지 않도록
-
-  let latestDate = null;
-  ['USD','GBP'].forEach(cur => {
-    const series = fxHistoryCache[cur];
-    if(series && series.length){
-      const sorted = [...series].sort((a,b) => a.date.localeCompare(b.date));
-      const latest = sorted[sorted.length - 1];
-      fxRates[cur] = latest.rate; // 환율탭과 동일한 값으로 덮어씀 (포트폴리오 계산에도 사용)
-      if(!latestDate || latest.date > latestDate) latestDate = latest.date;
-    }
-  });
-
-  document.getElementById('fxRateUSD').textContent = fxRates.USD ? `₩${won(fxRates.USD)}` : '-';
-  document.getElementById('fxRateGBP').textContent = fxRates.GBP ? `₩${won(fxRates.GBP)}` : '-';
-  if(latestDate){
-    document.getElementById('fxRateDate').textContent = latestDate.replace(/-/g,'/');
-    document.getElementById('fxRateDateWrap').style.display = '';
-  }
-}
-
 /* ============ 환율 탭 : 수출입은행 매매기준율 ============ */
 const isoDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const FX_TICKERS = { USD: 'KRW=X', GBP: 'GBPKRW=X' };
@@ -655,13 +619,7 @@ function computeBuySignal(curRate, avgRate, curIndex, avgIndex){
 }
 
 async function loadFxTab(){
-  if(fxLoaded){
-    // 시작 시점에 이미 불러온 데이터가 있으면 바로 렌더링만 한다
-    document.getElementById('fxContent').style.display = 'block';
-    const active = document.querySelector('#fxPills .pill.active')?.dataset.fx || 'USD';
-    renderFxCurrency(active);
-    return;
-  }
+  if(fxLoaded) return;
   fxLoaded = true;
   document.getElementById('fxProgress').style.display = 'block';
   document.getElementById('fxProgress').querySelector('.bar-track').style.display = 'none';
@@ -771,7 +729,8 @@ document.getElementById('fxExcelBtn').addEventListener('click', () => {
 
 /* ============ 메인 처리 ============ */
 async function init(){
-  await loadFxDataAtStartup();
+  await fetchFxRates();
+  document.getElementById('fxRate').textContent = fxRates.USD ? `₩${won(fxRates.USD)}` : '-';
 
   const raw = await loadHoldings();
 
