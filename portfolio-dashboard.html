@@ -326,6 +326,160 @@
     padding:30px 20px 50px;
     border-top:1px solid var(--border);
   }
+
+  /* ---------- 손익비 계산기 탭 ---------- */
+  .ta-wrap{max-width:760px;margin:0 auto;}
+  .ta-guide{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    border-radius:0;
+    padding:1.1rem 1.35rem;
+    margin-bottom:1.25rem;
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.8;
+  }
+  .ta-guide strong{color:var(--text);}
+  .ta-guide-title{font-size:14px;font-weight:700;color:var(--text);margin:0 0 0.4rem;}
+  .ta-guide table{width:100%;border-collapse:collapse;margin-top:0.6rem;font-size:12px;}
+  .ta-guide table th{background:var(--surface-2);color:var(--text);padding:5px 10px;text-align:left;font-weight:700;border-bottom:2px solid var(--border-strong);}
+  .ta-guide table td{padding:4px 10px;border-bottom:1px solid var(--border);background:#FFFFFF;color:var(--text-dim);}
+  .ta-guide table tr:last-child td{border-bottom:none;}
+  .ta-dropzone{
+    border:2px dashed var(--border-strong);
+    border-radius:0;
+    padding:2rem 1.5rem;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    background:var(--surface-2);
+    margin-bottom:1.25rem;
+  }
+  .ta-dropzone:hover,.ta-dropzone.dragover{border-color:var(--accent);background:#EAFBF1;}
+  .ta-dropzone-icon{font-size:32px;margin-bottom:0.5rem;}
+  .ta-dropzone-text{font-size:14px;color:var(--text);margin:0 0 0.3rem;}
+  .ta-dropzone-hint{font-size:12px;color:var(--text-dim);margin:0;}
+  .ta-file-input{display:none;}
+  .ta-dropzone-btn{
+    display:inline-block;
+    margin-top:0.75rem;
+    padding:7px 18px;
+    background:var(--accent);
+    color:#FFFFFF;
+    border-radius:0;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    border:none;
+    font-family:'Pretendard',sans-serif;
+  }
+  .ta-dropzone-btn:hover{background:#25B562;}
+  .ta-file-selected{display:none;align-items:center;gap:8px;margin-top:0.5rem;font-size:13px;color:var(--up);font-weight:700;justify-content:center;}
+  .ta-error{
+    display:none;
+    background:#FFFFFF;
+    border:1px solid var(--border-strong);
+    border-radius:0;
+    padding:0.75rem 1rem;
+    font-size:13px;
+    color:var(--text);
+    margin-bottom:1rem;
+    line-height:1.6;
+  }
+  .ta-btn{
+    width:100%;
+    padding:11px;
+    font-size:15px;
+    font-weight:700;
+    background:var(--accent);
+    color:#FFFFFF;
+    border:none;
+    border-radius:0;
+    cursor:pointer;
+    margin-bottom:1.5rem;
+    font-family:'Pretendard',sans-serif;
+  }
+  .ta-btn:hover{background:#25B562;}
+  .ta-btn:disabled{background:var(--border);color:var(--text-dim);cursor:not-allowed;}
+  .ta-result{display:none;}
+  .ta-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;}
+  @media(max-width:520px){.ta-kpi-grid{grid-template-columns:repeat(2,1fr);}}
+  .ta-kpi{
+    background:#FFFFFF;
+    border:1px solid var(--border);
+    border-radius:0;
+    padding:0.9rem;
+    text-align:center;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.4s ease,transform 0.4s ease;
+  }
+  .ta-kpi.show{opacity:1;transform:translateY(0);}
+  .ta-kpi .k-lbl{font-size:11px;color:var(--text-dim);margin:0 0 5px;font-weight:600;}
+  .ta-kpi .k-val{font-size:20px;font-weight:800;margin:0;line-height:1.2;}
+  .ta-kpi .k-sub{font-size:11px;color:var(--text-dim);margin:4px 0 0;}
+  .k-blue,.k-gold,.k-purple{color:var(--text);}
+  .k-green{color:var(--up);}
+  .k-red{color:var(--down);}
+  .ta-chart-box{
+    background:#FFFFFF;
+    border:1px solid var(--border);
+    border-radius:0;
+    padding:1.25rem 1.25rem 1rem;
+    margin-bottom:1.25rem;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.5s ease 0.35s,transform 0.5s ease 0.35s;
+  }
+  .ta-chart-box.show{opacity:1;transform:translateY(0);}
+  .ta-chart-title{font-size:13px;font-weight:700;color:var(--text);margin:0 0 0.85rem;text-transform:uppercase;letter-spacing:.04em;}
+  .ta-chart-legend{display:flex;gap:16px;font-size:11px;color:var(--text-dim);margin-bottom:0.5rem;flex-wrap:wrap;}
+  .ta-chart-legend span{display:flex;align-items:center;gap:5px;}
+  .legend-dot{width:10px;height:10px;display:inline-block;}
+  .ta-table-box{
+    background:#FFFFFF;
+    border:1px solid var(--border);
+    border-radius:0;
+    overflow:hidden;
+    margin-bottom:1.25rem;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.5s ease 0.55s,transform 0.5s ease 0.55s;
+  }
+  .ta-table-box.show{opacity:1;transform:translateY(0);}
+  .ta-table-header{display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1.1rem;border-bottom:2px solid var(--border-strong);}
+  .ta-table-title{font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
+  .ta-table-count{font-size:11px;color:var(--text-dim);}
+  .ta-table-scroll{overflow-x:auto;}
+  table.ta-table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px;}
+  table.ta-table th{background:var(--surface-2);padding:7px 12px;text-align:center;font-weight:700;color:var(--text-dim);border-bottom:1px solid var(--border);white-space:nowrap;}
+  table.ta-table td{padding:6px 12px;text-align:center;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+  table.ta-table td:nth-child(4),table.ta-table td:nth-child(5){text-align:right;}
+  table.ta-table tr:last-child td{border-bottom:none;}
+  table.ta-table tr.win td{background:#F3FCF7;}
+  table.ta-table tr.loss td{background:var(--surface-2);}
+  table.ta-table tr.subtotal td{background:var(--surface-2);font-weight:700;border-top:1px solid var(--border-strong);border-bottom:1px solid var(--border-strong);}
+  .amt-pos{color:var(--up);font-weight:700;}
+  .amt-neg{color:var(--down);font-weight:700;}
+  .badge{display:inline-block;padding:2px 6px;border-radius:0;font-size:10px;font-weight:700;border:1px solid;}
+  .badge-win{background:#F3FCF7;color:var(--up);border-color:var(--up);}
+  .badge-loss{background:var(--surface-2);color:var(--text);border-color:var(--border-strong);}
+  .ta-insight{
+    background:#F3FCF7;
+    border-left:3px solid var(--accent);
+    border-radius:0;
+    padding:1rem 1.25rem;
+    font-size:13px;
+    color:var(--text);
+    line-height:1.8;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity 0.5s ease 0.75s,transform 0.5s ease 0.75s;
+  }
+  .ta-insight.show{opacity:1;transform:translateY(0);}
+  .ta-insight-title{font-weight:700;color:var(--text);margin-bottom:0.3rem;}
+  .ta-footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:0.75rem;}
 </style>
 </head>
 <body>
@@ -355,6 +509,7 @@
   <button class="tab-btn" data-view="currency">통화별</button>
   <button class="tab-btn" data-view="fx">환율</button>
   <button class="tab-btn" data-view="rs">RS분석</button>
+  <button class="tab-btn" data-view="pl">손익비 계산기</button>
 </nav>
 
 <main>
@@ -502,7 +657,324 @@
       <div class="source-note" style="margin-top:10px;">종목·벤치마크 모두 선택한 기간 시작일 종가를 100으로 맞춰 정규화한 누적 수익률입니다. 초과수익(알파) = 종목 수익률 − 벤치마크 수익률. 참고용 계산이며 투자 조언이 아닙니다.</div>
     </div>
   </section>
+
+  <section id="view-pl" class="view">
+    <div class="ta-wrap">
+      <div class="ta-guide">
+        <p class="ta-guide-title">엑셀 파일 준비 방법</p>
+        증권사 HTS/MTS에서 <strong>실현손익 거래내역</strong>을 다운로드한 후,
+        아래 3개 열만 있으면 됩니다. 파일을 직접 수정하거나 새로 만들어도 됩니다.<br><br>
+        <strong>필수 열 (순서 무관, 헤더명 정확히 맞춰주세요)</strong>
+        <table>
+          <tr><th>거래일자</th><th>종목명</th><th>실현손익</th></tr>
+          <tr><td>2026-05-14</td><td>SK하이닉스</td><td>1,000,000</td></tr>
+          <tr><td>2026-05-14</td><td>SK하이닉스</td><td>1,100,000</td></tr>
+          <tr><td>2026-05-14</td><td>두산에너빌리티</td><td>-200,000</td></tr>
+          <tr><td>2026-05-15</td><td>삼성전자</td><td>350,000</td></tr>
+        </table>
+        <br>
+        같은 날 같은 종목은 분할 체결로 보아 1회 거래(One Trading)로 합산됩니다.<br>
+        날짜 형식은 yyyy-mm-dd 또는 yyyy/mm/dd 모두 지원합니다.<br>
+        실현손익의 콤마(,)는 있어도 없어도 됩니다.
+      </div>
+
+      <div class="ta-dropzone" id="ta-drop" onclick="document.getElementById('ta-file').click()">
+        <div class="ta-dropzone-icon">📂</div>
+        <p class="ta-dropzone-text">엑셀 파일을 여기에 드래그하거나</p>
+        <p class="ta-dropzone-hint">.xlsx / .xls / .csv 지원</p>
+        <button class="ta-dropzone-btn" onclick="event.stopPropagation();document.getElementById('ta-file').click()">파일 선택</button>
+        <div class="ta-file-selected" id="ta-file-selected">
+          <span>✓</span><span id="ta-file-name"></span>
+        </div>
+      </div>
+      <input type="file" id="ta-file" class="ta-file-input" accept=".xlsx,.xls,.csv" />
+
+      <div class="ta-error" id="ta-error"></div>
+
+      <button class="ta-btn" id="ta-calc-btn" onclick="taCalc()" disabled>계산하기</button>
+
+      <div class="ta-result" id="ta-result">
+        <div class="ta-kpi-grid" id="ta-kpi-grid"></div>
+
+        <div class="ta-chart-box" id="ta-chart-box">
+          <p class="ta-chart-title">거래별 실현손익 &amp; 누적실현손익</p>
+          <div class="ta-chart-legend">
+            <span><span class="legend-dot" style="background:var(--accent)"></span>실현손익 (막대)</span>
+            <span><span class="legend-dot" style="background:#000000;border-radius:2px;width:16px;height:3px;"></span>누적실현손익 (선)</span>
+          </div>
+          <canvas id="ta-chart" height="240"></canvas>
+        </div>
+
+        <div class="ta-table-box" id="ta-table-box">
+          <div class="ta-table-header">
+            <span class="ta-table-title">거래별 상세 내역</span>
+            <span class="ta-table-count" id="ta-table-count"></span>
+          </div>
+          <div class="ta-table-scroll">
+            <table class="ta-table">
+              <thead>
+                <tr>
+                  <th>No</th><th>거래일자</th><th>종목명</th><th>실현손익</th><th>누적실현손익</th><th>결과</th>
+                </tr>
+              </thead>
+              <tbody id="ta-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ta-insight" id="ta-insight"></div>
+      </div>
+
+      <p class="ta-footer">손익비 = 평균 수익 ÷ 평균 손실 | 승률 = 수익 거래 수 ÷ 전체 거래 수</p>
+    </div>
+  </section>
 </main>
+
+<script>
+/* ============ 손익비·승률 계산기 ============ */
+var taRawData = null;
+var taChart = null;
+
+var taDrop = document.getElementById('ta-drop');
+taDrop.addEventListener('dragover', function(e) { e.preventDefault(); taDrop.classList.add('dragover'); });
+taDrop.addEventListener('dragleave', function() { taDrop.classList.remove('dragover'); });
+taDrop.addEventListener('drop', function(e) {
+  e.preventDefault();
+  taDrop.classList.remove('dragover');
+  var f = e.dataTransfer.files[0];
+  if (f) taHandleFile(f);
+});
+document.getElementById('ta-file').addEventListener('change', function(e) {
+  if (e.target.files[0]) taHandleFile(e.target.files[0]);
+});
+
+function taHandleFile(file) {
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (['xlsx','xls','csv'].indexOf(ext) === -1) {
+    taShowErr('xlsx, xls, csv 파일만 지원합니다.');
+    return;
+  }
+  document.getElementById('ta-file-name').textContent = file.name;
+  document.getElementById('ta-file-selected').style.display = 'flex';
+  document.getElementById('ta-calc-btn').disabled = false;
+  taHideErr();
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      taRawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    } catch(err) {
+      taShowErr('파일을 읽는 중 오류가 발생했습니다: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function taShowErr(msg) {
+  var el = document.getElementById('ta-error');
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+function taHideErr() { document.getElementById('ta-error').style.display = 'none'; }
+
+function taNormalizeDate(val) {
+  if (!val) return null;
+  if (val instanceof Date) {
+    var y = val.getFullYear();
+    var mo = String(val.getMonth() + 1).padStart(2, '0');
+    var d  = String(val.getDate()).padStart(2, '0');
+    return y + '-' + mo + '-' + d;
+  }
+  var s = String(val).trim();
+  if (/^[A-Za-z]{3}\s/.test(s)) {
+    var dt = new Date(s);
+    if (!isNaN(dt)) {
+      return dt.getFullYear() + '-' +
+        String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+        String(dt.getDate()).padStart(2, '0');
+    }
+  }
+  s = s.replace(/\//g, '-').replace(/\./g, '-');
+  var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + '-' + m[2].padStart(2,'0') + '-' + m[3].padStart(2,'0');
+  if (/^\d{5}$/.test(s)) {
+    var d2 = new Date(Math.round((parseInt(s) - 25569) * 86400 * 1000));
+    return d2.getFullYear() + '-' +
+      String(d2.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d2.getDate()).padStart(2, '0');
+  }
+  return s;
+}
+
+function taToNum(val) {
+  if (val === null || val === '') return NaN;
+  if (typeof val === 'number') return val;
+  return parseFloat(String(val).replace(/,/g,'').trim());
+}
+
+function taFmtMoney(n) {
+  if (isNaN(n)) return '-';
+  return (n >= 0 ? '+' : '') + Math.round(n).toLocaleString('ko-KR') + '원';
+}
+function taFmtPct(n, dp) { return n.toFixed(dp === undefined ? 1 : dp) + '%'; }
+function taFmtRatio(n) { return n.toFixed(2) + ' : 1'; }
+
+function taCalc() {
+  taHideErr();
+  if (!taRawData || taRawData.length === 0) {
+    taShowErr('파일을 먼저 업로드해주세요.');
+    return;
+  }
+
+  var sample = taRawData[0];
+  var keys = Object.keys(sample);
+  function findKey(candidates) {
+    for (var i = 0; i < candidates.length; i++) {
+      for (var j = 0; j < keys.length; j++) {
+        if (keys[j].replace(/\s/g,'').includes(candidates[i])) return keys[j];
+      }
+    }
+    return null;
+  }
+  var kDate = findKey(['거래일자','일자','날짜','date','Date']);
+  var kName = findKey(['종목명','종목','name','Name','stock']);
+  var kPnl  = findKey(['실현손익','손익','pnl','PnL','profit','Profit']);
+
+  if (!kDate || !kName || !kPnl) {
+    taShowErr('엑셀에서 <strong>거래일자 / 종목명 / 실현손익</strong> 열을 찾을 수 없습니다.<br>헤더명을 정확히 입력했는지 확인해주세요.');
+    return;
+  }
+
+  var rows = [];
+  for (var i = 0; i < taRawData.length; i++) {
+    var r = taRawData[i];
+    var dt = taNormalizeDate(r[kDate]);
+    var nm = String(r[kName]).trim();
+    var pnl = taToNum(r[kPnl]);
+    if (!dt || !nm || isNaN(pnl)) continue;
+    rows.push({ date: dt, name: nm, pnl: pnl });
+  }
+  if (rows.length === 0) {
+    taShowErr('유효한 거래 데이터가 없습니다. 날짜·종목명·실현손익을 확인해주세요.');
+    return;
+  }
+
+  var grouped = {};
+  var order = [];
+  rows.forEach(function(r) {
+    var key = r.date + '||' + r.name;
+    if (!grouped[key]) { grouped[key] = { date: r.date, name: r.name, pnl: 0 }; order.push(key); }
+    grouped[key].pnl += r.pnl;
+  });
+  order.sort(function(a,b) { return grouped[a].date.localeCompare(grouped[b].date); });
+  var trades = order.map(function(k) { return grouped[k]; });
+
+  var cumPnl = 0;
+  trades.forEach(function(t, i) { cumPnl += t.pnl; t.cum = cumPnl; t.no = i + 1; });
+
+  var wins  = trades.filter(function(t){ return t.pnl > 0; });
+  var losses = trades.filter(function(t){ return t.pnl < 0; });
+  var total  = trades.length;
+  var winRate = total > 0 ? (wins.length / total * 100) : 0;
+  var avgWin  = wins.length  > 0 ? wins.reduce(function(s,t){ return s+t.pnl; },0)  / wins.length  : 0;
+  var avgLoss = losses.length > 0 ? Math.abs(losses.reduce(function(s,t){ return s+t.pnl; },0) / losses.length) : 0;
+  var plRatio = avgLoss > 0 ? avgWin / avgLoss : null;
+  var totalPnl = trades[trades.length-1].cum;
+  var expectancy = (winRate/100) * avgWin - (1 - winRate/100) * avgLoss;
+
+  var kpiEl = document.getElementById('ta-kpi-grid');
+  kpiEl.innerHTML =
+    taKpiCard('총 거래 횟수', total + '회', wins.length + '승 ' + losses.length + '패', 'k-blue') +
+    taKpiCard('승률', taFmtPct(winRate), wins.length + '회 수익 거래', winRate >= 50 ? 'k-green' : 'k-red') +
+    taKpiCard('손익비 (P/L)', plRatio !== null ? taFmtRatio(plRatio) : 'N/A', '평균수익 ÷ 평균손실', plRatio >= 1 ? 'k-gold' : 'k-purple') +
+    taKpiCard('누적 실현손익', taFmtMoney(totalPnl).replace('원',''), '원', totalPnl >= 0 ? 'k-green' : 'k-red');
+
+  document.getElementById('ta-result').style.display = 'block';
+  kpiEl.querySelectorAll('.ta-kpi').forEach(function(el,i){
+    el.classList.remove('show');
+    setTimeout(function(){ el.classList.add('show'); }, 60 + i*100);
+  });
+  setTimeout(function(){ document.getElementById('ta-chart-box').classList.add('show'); }, 320);
+  setTimeout(function(){ document.getElementById('ta-table-box').classList.add('show'); }, 500);
+  setTimeout(function(){ document.getElementById('ta-insight').classList.add('show'); }, 700);
+
+  var labels = trades.map(function(t){ return '#' + t.no; });
+  var barData = trades.map(function(t){ return t.pnl; });
+  var lineData = trades.map(function(t){ return t.cum; });
+  var barColors = trades.map(function(t){ return t.pnl >= 0 ? 'rgba(45,204,112,0.75)' : 'rgba(26,26,26,0.75)'; });
+  var barBorders = trades.map(function(t){ return t.pnl >= 0 ? '#2DCC70' : '#1A1A1A'; });
+
+  if (taChart) taChart.destroy();
+  var ctx = document.getElementById('ta-chart').getContext('2d');
+  taChart = new Chart(ctx, {
+    data: {
+      labels: labels,
+      datasets: [
+        { type: 'bar', label: '실현손익', data: barData, backgroundColor: barColors, borderColor: barBorders, borderWidth: 1.5, borderRadius: 0, yAxisID: 'yBar', order: 2 },
+        { type: 'line', label: '누적실현손익', data: lineData, borderColor: '#000000', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#000000', pointBorderColor: '#fff', pointBorderWidth: 1.5, tension: 0.3, fill: true, yAxisID: 'yCum', order: 1 }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: function(items) { var t = trades[items[0].dataIndex]; return '#' + t.no + '  ' + t.date + '  ' + t.name; },
+            label: function(ctx) { var v = ctx.raw; return ctx.dataset.label + ': ' + (v >= 0 ? '+' : '') + Math.round(v).toLocaleString('ko-KR') + '원'; }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 30, color:'#6B6B6B' }, grid: { display: false } },
+        yBar: { type: 'linear', position: 'left', ticks: { font: { size: 10 }, color:'#6B6B6B', callback: function(v) { return (v/10000).toFixed(0) + '만'; } }, grid: { color: '#00000012' } },
+        yCum: { type: 'linear', position: 'right', ticks: { font: { size: 10 }, color:'#6B6B6B', callback: function(v) { return (v/10000).toFixed(0) + '만'; } }, grid: { display: false } }
+      }
+    }
+  });
+
+  var tbody = document.getElementById('ta-tbody');
+  tbody.innerHTML = '';
+  trades.forEach(function(t) {
+    var isWin = t.pnl > 0;
+    var tr = document.createElement('tr');
+    tr.className = isWin ? 'win' : 'loss';
+    tr.innerHTML =
+      '<td style="font-weight:700;">' + t.no + '</td>' +
+      '<td>' + t.date + '</td>' +
+      '<td>' + t.name + '</td>' +
+      '<td class="' + (isWin ? 'amt-pos' : 'amt-neg') + '">' + taFmtMoney(t.pnl) + '</td>' +
+      '<td class="' + (t.cum >= 0 ? 'amt-pos' : 'amt-neg') + '">' + taFmtMoney(t.cum) + '</td>' +
+      '<td><span class="badge ' + (isWin ? 'badge-win' : 'badge-loss') + '">' + (isWin ? '수익' : '손실') + '</span></td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('ta-table-count').textContent = '총 ' + total + '건';
+
+  var breakEven = plRatio !== null ? (1 / (1 + plRatio) * 100) : null;
+  var insight = '<p class="ta-insight-title">분석 요약 — 이익은 길게, 손실은 짧게</p>';
+  insight += '총 <strong>' + total + '회</strong> 거래에서 승률 <strong>' + taFmtPct(winRate) + '</strong>';
+  if (plRatio !== null) {
+    insight += ', 손익비 <strong>' + taFmtRatio(plRatio) + '</strong>입니다.<br>';
+    insight += '평균 수익 <strong>+' + Math.round(avgWin).toLocaleString('ko-KR') + '원</strong> vs 평균 손실 <strong>-' + Math.round(avgLoss).toLocaleString('ko-KR') + '원</strong>.<br>';
+    insight += '기대값(1회 거래당 예상 손익): <strong class="' + (expectancy>=0?'amt-pos':'amt-neg') + '">' + taFmtMoney(expectancy) + '</strong><br>';
+    if (breakEven !== null) {
+      insight += '현재 손익비(' + taFmtRatio(plRatio) + ')를 유지하려면 <strong>최소 승률 ' + taFmtPct(breakEven) + '</strong> 이상이어야 수익이 납니다.<br>';
+    }
+    if (plRatio >= 2 && winRate >= 40) insight += '손익비와 승률 모두 우수합니다. 현재 전략을 유지하세요.';
+    else if (plRatio >= 1.5) insight += '손익비가 양호합니다. 승률을 조금 더 높이면 더 강한 전략이 됩니다.';
+    else if (plRatio < 1) insight += '손실이 수익보다 큽니다. 손절 기준을 더 엄격히 적용해 손익비를 개선해야 합니다.';
+    else insight += '평균적인 손익비입니다. 이익 실현을 조금 더 늦추거나 손절을 빠르게 하면 손익비가 개선됩니다.';
+  }
+  document.getElementById('ta-insight').innerHTML = insight;
+}
+
+function taKpiCard(lbl, val, sub, cls) {
+  return '<div class="ta-kpi"><p class="k-lbl">' + lbl + '</p><p class="k-val ' + cls + '">' + val + '</p><p class="k-sub">' + sub + '</p></div>';
+}
+</script>
 
 <footer>계좌명 · 자산군 · 수량 · 통화 · 매입단가는 연결된 구글 시트에서 관리합니다. 시세와 환율은 새로고침할 때마다 자동으로 갱신됩니다.</footer>
 
