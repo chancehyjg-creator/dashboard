@@ -362,9 +362,9 @@
       <div class="table-scroll">
         <table id="totalTable">
           <thead><tr>
-            <th>계좌</th><th>자산군</th><th>종목</th>
+            <th>계좌</th><th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th>
             <th class="num">수량</th><th class="num">현재가</th>
-            <th class="num">평가금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
+            <th class="num">평가금액(KRW)</th><th class="num">매입금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -379,9 +379,9 @@
       <div class="table-scroll">
         <table id="accountTable">
           <thead><tr>
-            <th>자산군</th><th>종목</th><th class="num">수량</th>
+            <th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th><th class="num">수량</th>
             <th class="num">통화</th><th class="num">현재가</th>
-            <th class="num">평가금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
+            <th class="num">평가금액(KRW)</th><th class="num">매입금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -396,8 +396,8 @@
       <div class="table-scroll">
         <table id="currencyTable">
           <thead><tr>
-            <th>계좌</th><th>자산군</th><th>종목</th><th class="num">수량</th>
-            <th class="num">현재가</th><th class="num">평가금액(원화)</th>
+            <th>계좌</th><th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th><th class="num">수량</th>
+            <th class="num">현재가</th><th class="num">평가금액(원화)</th><th class="num">매입금액(원화)</th>
             <th class="num">손익</th><th class="num">수익률</th>
           </tr></thead>
           <tbody></tbody>
@@ -461,15 +461,19 @@
 /* ============ 설정 ============ */
 // 구글 시트를 "웹에 게시 > CSV"로 게시한 뒤 나온 URL을 아래에 붙여넣으세요.
 // 시트 헤더(첫 줄)는 반드시 다음 이름을 포함해야 합니다:
-// 계좌명, 자산군, 종목명, 티커, 수량, 통화, 매입단가, 매입일
-const SHEET_CSV_URL = "";
+// 계좌명, 자산군, 종목명, 티커, 수량, 통화, 매입단가, 매입일, 위험/안전, 세부자산
+// (위험/안전, 세부자산은 선택 입력 — 비워두면 "-"로 표시됩니다)
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1P6Kb34gzG6dgyNNM7QHqn2UpAsX-gFbp3EG70cttI7o/export?format=csv&gid=0";
 
 // 국내 종목 티커는 야후 파이낸스 형식으로 입력하세요: 코스피는 종목코드+.KS (예: 005930.KS), 코스닥은 .KQ
 const DEMO_DATA = [
-  {계좌명:"연금저축", 자산군:"해외ETF", 종목명:"SCHD", 티커:"SCHD", 수량:120, 통화:"USD", 매입단가:24.5, 매입일:"2023-05-10"},
-  {계좌명:"연금저축", 자산군:"해외주식", 종목명:"Apple", 티커:"AAPL", 수량:8, 통화:"USD", 매입단가:165, 매입일:"2024-01-15"},
-  {계좌명:"ISA", 자산군:"국내주식", 종목명:"삼성전자", 티커:"005930.KS", 수량:30, 통화:"KRW", 매입단가:68000, 매입일:"2023-11-02"},
-  {계좌명:"ISA", 자산군:"국내ETF", 종목명:"TIGER 미국배당다우존스", 티커:"458730.KS", 수량:200, 통화:"KRW", 매입단가:11200, 매입일:"2024-03-20"},
+  {계좌명:"연금저축", 자산군:"해외ETF", 종목명:"SCHD", 티커:"SCHD", 수량:120, 통화:"USD", 매입단가:24.5, 매입일:"2023-05-10", 위험도:"안전", 세부자산:"배당ETF"},
+  {계좌명:"IRP", 자산군:"국내ETF", 종목명:"TIGER 미국나스닥100", 티커:"133690.KS", 수량:50, 통화:"KRW", 매입단가:98000, 매입일:"2024-02-10", 위험도:"위험", 세부자산:"성장ETF"},
+  {계좌명:"ISA", 자산군:"국내주식", 종목명:"삼성전자", 티커:"005930.KS", 수량:30, 통화:"KRW", 매입단가:68000, 매입일:"2023-11-02", 위험도:"위험", 세부자산:"개별주"},
+  {계좌명:"ISA", 자산군:"국내ETF", 종목명:"TIGER 미국배당다우존스", 티커:"458730.KS", 수량:200, 통화:"KRW", 매입단가:11200, 매입일:"2024-03-20", 위험도:"안전", 세부자산:"배당ETF"},
+  {계좌명:"해외주식1", 자산군:"해외주식", 종목명:"Apple", 티커:"AAPL", 수량:8, 통화:"USD", 매입단가:165, 매입일:"2024-01-15", 위험도:"위험", 세부자산:"개별주"},
+  {계좌명:"해외주식2", 자산군:"해외주식", 종목명:"Microsoft", 티커:"MSFT", 수량:5, 통화:"USD", 매입단가:340, 매입일:"2024-04-05", 위험도:"위험", 세부자산:"개별주"},
+  {계좌명:"업비트", 자산군:"가상자산", 종목명:"Bitcoin", 티커:"BTC-USD", 수량:0.05, 통화:"USD", 매입단가:42000, 매입일:"2024-06-01", 위험도:"위험", 세부자산:"코인"},
 ];
 
 const CORS_PROXIES = [
@@ -502,11 +506,31 @@ async function fetchWithProxies(url){
 }
 
 /* ============ CSV 파싱 ============ */
+function parseCSVLine(line){
+  const cells = [];
+  let cur = '', inQuotes = false;
+  for(let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if(inQuotes){
+      if(ch === '"'){
+        if(line[i+1] === '"'){ cur += '"'; i++; } // 이스케이프된 큰따옴표
+        else inQuotes = false;
+      }else cur += ch;
+    }else{
+      if(ch === '"') inQuotes = true;
+      else if(ch === ','){ cells.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  cells.push(cur);
+  return cells.map(c => c.trim());
+}
+
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  const headers = parseCSVLine(lines[0]);
   return lines.slice(1).filter(l => l.trim()).map(line => {
-    const cells = line.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+    const cells = parseCSVLine(line);
     const row = {};
     headers.forEach((h,i) => row[h] = cells[i] ?? '');
     return row;
@@ -514,6 +538,28 @@ function parseCSV(text){
 }
 
 /* ============ 데이터 로드 ============ */
+const parseNum = s => parseFloat(String(s ?? '0').replace(/,/g,'')) || 0;
+
+const CURRENCY_MAP = { '원화':'KRW', '달러':'USD', '파운드':'GBP', 'KRW':'KRW', 'USD':'USD', 'GBP':'GBP' };
+function normalizeCurrency(v){ return CURRENCY_MAP[(v||'').trim()] || v; }
+
+// 트레이딩뷰 스타일 "거래소:심볼" 티커를 야후 파이낸스 형식으로 변환
+// 예: KRX:360750 -> 360750.KS, NYSEARCA:XLK -> XLK, LON:SMT -> SMT.L
+const EXCHANGE_SUFFIX = {
+  KRX: '.KS',      // 주의: 코스닥 개별 종목은 실제로 .KQ가 맞을 수 있음 (ETF는 대부분 .KS)
+  NASDAQ: '', NYSE: '', NYSEARCA: '', AMEX: '', ARCA: '', BATS: '', OTC: '',
+  LON: '.L', LSE: '.L',
+};
+function toYahooTicker(raw){
+  const t = (raw || '').trim();
+  if(!t) return '';
+  const m = t.match(/^([A-Za-z]+):(.+)$/);
+  if(!m) return t; // 이미 야후 형식(AAPL, 005930.KS 등)이면 그대로 사용
+  const [, exch, sym] = m;
+  const suffix = EXCHANGE_SUFFIX[exch.toUpperCase()];
+  return suffix != null ? sym + suffix : sym; // 모르는 거래소 접두어는 일단 심볼만 사용
+}
+
 async function loadHoldings(){
   if(!SHEET_CSV_URL){
     document.getElementById('config-banner').style.display = 'block';
@@ -523,9 +569,13 @@ async function loadHoldings(){
   const rows = parseCSV(csvText);
   return rows.map(r => ({
     계좌명: r['계좌명'], 자산군: r['자산군'], 종목명: r['종목명'],
-    티커: r['티커'], 수량: parseFloat(r['수량']) || 0,
-    통화: r['통화'], 매입단가: parseFloat(r['매입단가']) || 0, 매입일: r['매입일'],
-  })).filter(r => r.티커);
+    티커: toYahooTicker(r['티커']), // 티커 없으면 '' (현금성 자산으로 처리)
+    수량: parseNum(r['수량']),
+    통화: normalizeCurrency(r['통화']),
+    매입단가: parseNum(r['매입단가']),
+    매입일: r['매입일자'] || r['매입일'] || '',
+    위험도: r['위험/안전'] || '', 세부자산: r['자산'] || r['세부자산'] || '',
+  })).filter(r => r.계좌명 && r.종목명); // 티커가 없어도(현금 등) 계좌명·종목명만 있으면 포함
 }
 
 async function fetchQuote(ticker){
@@ -735,6 +785,11 @@ async function init(){
   const raw = await loadHoldings();
 
   const results = await Promise.all(raw.map(async h => {
+    if(!h.티커){
+      // 티커 없음 = 현금·MMF·예수금 등 현금성 자산 — 시세 조회 없이 매입단가를 그대로 사용
+      const price = h.매입단가 || 1;
+      return {...h, 현재가: price, 전일종가: price};
+    }
     try{
       const q = await fetchQuote(h.티커);
       return {...h, 현재가: q.price, 전일종가: q.prevClose};
@@ -772,16 +827,22 @@ function renderTicker(){
 
 function rowHTML(h, cols){
   const pnlCls = pctClass(h.손익KRW);
+  const riskCls = h.위험도 === '위험' ? 'up' : h.위험도 === '안전' ? 'down' : '';
   const base = {
-    계좌: h.계좌명, 자산군: `<span class="tag">${h.자산군}</span>`, 종목: h.종목명,
+    계좌: h.계좌명, 자산군: `<span class="tag">${h.자산군}</span>`,
+    세부자산: h.세부자산 ? `<span class="tag">${h.세부자산}</span>` : '-',
+    종목: h.종목명,
+    위험도: h.위험도 ? `<span class="${riskCls}">${h.위험도}</span>` : '-',
     수량: h.수량.toLocaleString('ko-KR'), 통화: h.통화,
     현재가: `${h.통화 === 'KRW' ? '₩' : '$'}${fmt2(h.현재가)}`,
     '평가금액(KRW)': `₩${won(h.평가금액KRW)}`,
     '평가금액(원화)': `₩${won(h.평가금액KRW)}`,
+    '매입금액(KRW)': `₩${won(h.매입금액KRW)}`,
+    '매입금액(원화)': `₩${won(h.매입금액KRW)}`,
     손익: `<span class="${pnlCls}">${h.손익KRW>=0?'+':''}₩${won(h.손익KRW)}</span>`,
     수익률: `<span class="${pnlCls}">${pctSign(h.수익률)}${h.수익률.toFixed(2)}%</span>`,
   };
-  return `<tr>${cols.map(c => `<td class="${['수량','현재가','평가금액(KRW)','평가금액(원화)','손익','수익률'].includes(c)?'num mono':''}">${base[c]}</td>`).join('')}</tr>`;
+  return `<tr>${cols.map(c => `<td class="${['수량','현재가','평가금액(KRW)','평가금액(원화)','매입금액(KRW)','매입금액(원화)','손익','수익률'].includes(c)?'num mono':''}">${base[c]}</td>`).join('')}</tr>`;
 }
 
 function renderTotalView(){
@@ -803,7 +864,7 @@ function renderTotalView(){
 
   const tbody = document.querySelector('#totalTable tbody');
   tbody.innerHTML = [...holdings].sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['계좌','자산군','종목','수량','현재가','평가금액(KRW)','손익','수익률'])).join('');
+    .map(h => rowHTML(h, ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'])).join('');
 
   const byClass = groupSum(holdings, '자산군');
   new Chart(document.getElementById('assetClassChart'), donutConfig(byClass));
@@ -856,7 +917,7 @@ function fillAccount(account){
     <div class="item"><div class="label">보유 종목</div><div class="val">${rows.length}</div></div>`;
   document.querySelector('#accountTable tbody').innerHTML = rows
     .sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['자산군','종목','수량','통화','현재가','평가금액(KRW)','손익','수익률'])).join('');
+    .map(h => rowHTML(h, ['자산군','세부자산','종목','위험도','수량','통화','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'])).join('');
 }
 
 function renderCurrencyView(){
@@ -881,7 +942,7 @@ function fillCurrency(currency){
     <div class="item"><div class="label">보유 종목</div><div class="val">${rows.length}</div></div>`;
   document.querySelector('#currencyTable tbody').innerHTML = rows
     .sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['계좌','자산군','종목','수량','현재가','평가금액(원화)','손익','수익률'])).join('');
+    .map(h => rowHTML(h, ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(원화)','매입금액(원화)','손익','수익률'])).join('');
 }
 
 /* ============ 탭 전환 ============ */
