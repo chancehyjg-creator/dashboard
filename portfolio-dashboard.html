@@ -42,32 +42,6 @@
   }
   #config-banner code{background:#00000040;padding:1px 6px;border-radius:4px;}
 
-  /* ---------- 티커 테이프 ---------- */
-  .ticker-wrap{
-    overflow:hidden;
-    background:#0f1115;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-    padding:10px 0;
-  }
-  .ticker-track{
-    display:inline-block;
-    animation:scroll-left 40s linear infinite;
-  }
-  .ticker-item{
-    display:inline-flex;
-    align-items:baseline;
-    gap:6px;
-    padding:0 22px;
-    font-size:13px;
-  }
-  .ticker-item .name{color:var(--text-dim);}
-  .ticker-item .price{font-weight:600;}
-  @keyframes scroll-left{
-    from{transform:translateX(0);}
-    to{transform:translateX(-50%);}
-  }
-
   header.hero{
     padding:36px 24px 24px;
     max-width:1180px;
@@ -183,6 +157,9 @@
     background:#2a3140;
     color:var(--text-dim);
   }
+  thead th[data-key]{cursor:pointer; user-select:none;}
+  thead th[data-key]:hover{color:var(--text);}
+  thead th[data-key].sorted::after{content:" ▾"; color:var(--gold);}
   .table-scroll{overflow-x:auto;}
   .price-edit{
     cursor:pointer;
@@ -337,8 +314,6 @@
   (시트 → 파일 → 공유 → 웹에 게시 → CSV 선택 → 게시 → URL 복사)
 </div>
 
-<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
-
 <header class="hero">
   <div class="eyebrow">TOTAL PORTFOLIO VALUE</div>
   <div class="total-value mono" id="totalValue">-</div>
@@ -348,7 +323,7 @@
     <span>보유 종목 <span class="stat-val mono" id="totalCount">-</span></span>
     <span>기준환율(USD) <span class="stat-val mono" id="fxRateUSD">-</span></span>
     <span>기준환율(GBP) <span class="stat-val mono" id="fxRateGBP">-</span></span>
-    <span id="fxRateDateWrap" style="display:none;">(<span class="mono" id="fxRateDate"></span> 기준)</span>
+    <span id="fxRateDateWrap" style="display:none;"><span class="mono" id="fxRateDate"></span> 기준</span>
   </div>
 </header>
 
@@ -378,9 +353,9 @@
       <div class="table-scroll">
         <table id="totalTable">
           <thead><tr>
-            <th>계좌</th><th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th>
-            <th class="num">수량</th><th class="num">현재가</th>
-            <th class="num">평가금액(KRW)</th><th class="num">매입금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
+            <th data-key="계좌명">계좌</th><th data-key="자산군">자산군</th><th data-key="세부자산">세부자산</th><th data-key="종목명">종목</th><th data-key="위험도">위험도</th>
+            <th class="num" data-key="수량">수량</th><th class="num" data-key="현재가">현재가</th>
+            <th class="num" data-key="평가금액KRW">평가금액(KRW)</th><th class="num" data-key="매입금액KRW">매입금액(KRW)</th><th class="num" data-key="손익KRW">손익</th><th class="num" data-key="수익률">수익률</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -395,9 +370,9 @@
       <div class="table-scroll">
         <table id="accountTable">
           <thead><tr>
-            <th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th><th class="num">수량</th>
-            <th class="num">통화</th><th class="num">현재가</th>
-            <th class="num">평가금액(KRW)</th><th class="num">매입금액(KRW)</th><th class="num">손익</th><th class="num">수익률</th>
+            <th data-key="자산군">자산군</th><th data-key="세부자산">세부자산</th><th data-key="종목명">종목</th><th data-key="위험도">위험도</th><th class="num" data-key="수량">수량</th>
+            <th class="num" data-key="통화">통화</th><th class="num" data-key="현재가">현재가</th>
+            <th class="num" data-key="평가금액KRW">평가금액(KRW)</th><th class="num" data-key="매입금액KRW">매입금액(KRW)</th><th class="num" data-key="손익KRW">손익</th><th class="num" data-key="수익률">수익률</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -412,9 +387,9 @@
       <div class="table-scroll">
         <table id="currencyTable">
           <thead><tr>
-            <th>계좌</th><th>자산군</th><th>세부자산</th><th>종목</th><th>위험도</th><th class="num">수량</th>
-            <th class="num">현재가</th><th class="num">평가금액(원화)</th><th class="num">매입금액(원화)</th>
-            <th class="num">손익</th><th class="num">수익률</th>
+            <th data-key="계좌명">계좌</th><th data-key="자산군">자산군</th><th data-key="세부자산">세부자산</th><th data-key="종목명">종목</th><th data-key="위험도">위험도</th><th class="num" data-key="수량">수량</th>
+            <th class="num" data-key="현재가">현재가</th><th class="num" data-key="평가금액KRW">평가금액(원화)</th><th class="num" data-key="매입금액KRW">매입금액(원화)</th>
+            <th class="num" data-key="손익KRW">손익</th><th class="num" data-key="수익률">수익률</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -461,7 +436,7 @@
         <h3 id="fxTableTitle">일별 환율 데이터</h3>
         <div class="fx-table-wrap table-scroll">
           <table id="fxTable">
-            <thead><tr><th>날짜</th><th class="num">매매기준율(원)</th></tr></thead>
+            <thead><tr><th data-key="date">날짜</th><th class="num" data-key="rate">매매기준율(원)</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -667,17 +642,16 @@ async function loadFxDataAtStartup(){
   ['USD','GBP'].forEach(cur => {
     const series = fxHistoryCache[cur];
     if(series && series.length){
-      const sorted = [...series].sort((a,b) => a.date.localeCompare(b.date));
-      const latest = sorted[sorted.length - 1];
+      const latest = latestStableEntry(series);
       fxRates[cur] = latest.rate; // 환율탭과 동일한 값으로 덮어씀 (포트폴리오 계산에도 사용)
       if(!latestDate || latest.date > latestDate) latestDate = latest.date;
     }
   });
 
-  document.getElementById('fxRateUSD').textContent = fxRates.USD ? `₩${won(fxRates.USD)}` : '-';
-  document.getElementById('fxRateGBP').textContent = fxRates.GBP ? `₩${won(fxRates.GBP)}` : '-';
+  document.getElementById('fxRateUSD').textContent = fxRates.USD ? `₩${fmt2(fxRates.USD)}` : '-';
+  document.getElementById('fxRateGBP').textContent = fxRates.GBP ? `₩${fmt2(fxRates.GBP)}` : '-';
   if(latestDate){
-    document.getElementById('fxRateDate').textContent = latestDate.replace(/-/g,'/');
+    document.getElementById('fxRateDate').textContent = latestDate;
     document.getElementById('fxRateDateWrap').style.display = '';
   }
 }
@@ -708,6 +682,15 @@ async function fetchFxHistory(curUnit){
 
 async function fetchDollarIndexHistory(){
   return fetchYahooHistory('DX-Y.NYB'); // [{date, value}]
+}
+
+// 야후 환율/지수는 거의 24시간 움직이기 때문에, 그날 데이터를 그대로 쓰면
+// 열 때마다 값이 바뀐다. 오늘 날짜는 제외하고 마지막으로 "마감된" 날짜를 고정값으로 사용한다.
+function latestStableEntry(series){
+  const todayStr = isoDate(new Date());
+  const sorted = [...series].sort((a,b) => a.date.localeCompare(b.date));
+  const stable = sorted.filter(r => r.date < todayStr);
+  return stable.length ? stable[stable.length - 1] : sorted[sorted.length - 1];
 }
 
 function avgLast52w(series, valueKey){
@@ -789,14 +772,14 @@ function renderFxCurrency(curUnit){
     return;
   }
   const sorted = [...series].sort((a,b) => a.date.localeCompare(b.date));
-  const current = sorted[sorted.length - 1];
+  const current = latestStableEntry(series);
   const avgRate = avgLast52w(sorted, 'rate');
 
   document.getElementById('fxCurrentRate').textContent = `₩${fmt2(current.rate)}`;
   document.getElementById('fx52wRate').textContent = avgRate ? `₩${fmt2(avgRate)}` : '-';
 
   if(isUSD){
-    const curIndex = dollarIndexHistory.length ? dollarIndexHistory[dollarIndexHistory.length-1].value : null;
+    const curIndex = dollarIndexHistory.length ? latestStableEntry(dollarIndexHistory).value : null;
     const avgIndex = avgLast52w(dollarIndexHistory, 'value');
     document.getElementById('fxCurrentIndex').textContent = curIndex ? fmt2(curIndex) : '-';
     document.getElementById('fx52wIndex').textContent = avgIndex ? fmt2(avgIndex) : '-';
@@ -839,8 +822,8 @@ function renderFxCurrency(curUnit){
     }
   });
 
-  document.querySelector('#fxTable tbody').innerHTML = [...sorted].reverse()
-    .map(r => `<tr><td>${r.date}</td><td class="num mono">${fmt2(r.rate)}</td></tr>`).join('');
+  tableRows.fxTable = [...sorted].reverse();
+  renderFxTbody();
 }
 
 document.getElementById('fxPills').querySelectorAll('.pill').forEach(p => {
@@ -891,10 +874,56 @@ function buildHoldings(results){
 }
 
 function rerenderAll(){
-  renderTicker();
   renderTotalView();
   renderAccountView();
   renderCurrencyView();
+}
+
+/* ---------- 헤더 클릭 정렬 (내림차순) ---------- */
+const TABLE_COLS = {
+  totalTable: ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'],
+  accountTable: ['자산군','세부자산','종목','위험도','수량','통화','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'],
+  currencyTable: ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(원화)','매입금액(원화)','손익','수익률'],
+};
+let tableRows = { totalTable: [], accountTable: [], currencyTable: [], fxTable: [] };
+
+function renderMainTbody(tableId){
+  document.querySelector(`#${tableId} tbody`).innerHTML = tableRows[tableId]
+    .map(h => rowHTML(h, TABLE_COLS[tableId])).join('');
+}
+function renderFxTbody(){
+  document.querySelector('#fxTable tbody').innerHTML = tableRows.fxTable
+    .map(r => `<tr><td>${r.date}</td><td class="num mono">${fmt2(r.rate)}</td></tr>`).join('');
+}
+function sortRowsDesc(rows, key){
+  return [...rows].sort((a,b) => {
+    const av = a[key], bv = b[key];
+    if(typeof av === 'string' || typeof bv === 'string'){
+      return String(bv).localeCompare(String(av), 'ko');
+    }
+    return (bv ?? 0) - (av ?? 0);
+  });
+}
+function markSortedHeader(activeTh){
+  activeTh.closest('tr').querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
+  activeTh.classList.add('sorted');
+}
+function setupSortableHeaders(){
+  document.querySelectorAll('#totalTable thead th[data-key], #accountTable thead th[data-key], #currencyTable thead th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const tableId = th.closest('table').id;
+      tableRows[tableId] = sortRowsDesc(tableRows[tableId], th.dataset.key);
+      renderMainTbody(tableId);
+      markSortedHeader(th);
+    });
+  });
+  document.querySelectorAll('#fxTable thead th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      tableRows.fxTable = sortRowsDesc(tableRows.fxTable, th.dataset.key);
+      renderFxTbody();
+      markSortedHeader(th);
+    });
+  });
 }
 
 function editPrice(key, currentPrice){
@@ -941,15 +970,6 @@ async function init(){
 }
 
 /* ============ 렌더링 ============ */
-function renderTicker(){
-  const items = holdings.map(h => `
-    <span class="ticker-item">
-      <span class="name">${h.종목명}</span>
-      <span class="price mono ${pctClass(h.일간등락)}">${fmt2(h.현재가)} (${pctSign(h.일간등락)}${h.일간등락.toFixed(2)}%)</span>
-    </span>`).join('');
-  document.getElementById('tickerTrack').innerHTML = items + items; // 무한 스크롤용 2배 복제
-}
-
 function rowHTML(h, cols){
   const pnlCls = pctClass(h.손익KRW);
   const riskCls = h.위험도 === '위험' ? 'up' : h.위험도 === '안전' ? 'down' : '';
@@ -962,7 +982,7 @@ function rowHTML(h, cols){
     종목: h.종목명,
     위험도: h.위험도 ? `<span class="${riskCls}">${h.위험도}</span>` : '-',
     수량: h.수량.toLocaleString('ko-KR'), 통화: h.통화,
-    현재가: `<span class="price-edit" title="클릭해서 현재가 직접 수정" onclick='editPrice(${keyAttr}, ${h.현재가})'>${h.통화 === 'KRW' ? '₩' : '$'}${fmt2(h.현재가)}✎</span>${editedTag}`,
+    현재가: `<span class="price-edit" title="클릭해서 현재가 직접 수정" onclick='editPrice(${keyAttr}, ${h.현재가})'>${h.통화 === 'KRW' ? '₩' : h.통화 === 'GBP' ? '£' : '$'}${fmt2(h.현재가)}✎</span>${editedTag}`,
     '평가금액(KRW)': `₩${won(h.평가금액KRW)}`,
     '평가금액(원화)': `₩${won(h.평가금액KRW)}`,
     '매입금액(KRW)': `₩${won(h.매입금액KRW)}`,
@@ -990,9 +1010,8 @@ function renderTotalView(){
   pctEl.className = `stat-val mono ${pctClass(totalPnlPct)}`;
   document.getElementById('totalCount').textContent = holdings.length;
 
-  const tbody = document.querySelector('#totalTable tbody');
-  tbody.innerHTML = [...holdings].sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'])).join('');
+  tableRows.totalTable = [...holdings].sort((a,b)=>b.평가금액KRW-a.평가금액KRW);
+  renderMainTbody('totalTable');
 
   const byClass = groupSum(holdings, '자산군');
   new Chart(document.getElementById('assetClassChart'), donutConfig(byClass));
@@ -1009,15 +1028,42 @@ function groupSum(arr, key){
 
 function donutConfig(map){
   const palette = ['#d4a24c','#e5484d','#4c8bf5','#7dd3a8','#a78bfa','#f0a868','#8b93a1'];
+  const labels = Object.keys(map);
+  const values = Object.values(map);
+  const total = values.reduce((s,v) => s+v, 0);
+  const pctOf = v => total ? (v/total*100).toFixed(1) : '0.0';
   return {
     type:'doughnut',
     data:{
-      labels:Object.keys(map),
-      datasets:[{data:Object.values(map), backgroundColor:palette, borderColor:'#1b1f27', borderWidth:2}]
+      labels,
+      datasets:[{data:values, backgroundColor:palette, borderColor:'#1b1f27', borderWidth:2}]
     },
     options:{
       maintainAspectRatio:false,
-      plugins:{legend:{position:'right', labels:{color:'#8b93a1', font:{size:11}, boxWidth:10}}}
+      plugins:{
+        legend:{
+          position:'right',
+          labels:{
+            color:'#8b93a1', font:{size:11}, boxWidth:10,
+            generateLabels(chart){
+              const ds = chart.data.datasets[0];
+              return chart.data.labels.map((label,i) => ({
+                text: `${label} ${pctOf(ds.data[i])}%`,
+                fillStyle: ds.backgroundColor[i],
+                strokeStyle: ds.borderColor,
+                index: i,
+              }));
+            }
+          }
+        },
+        tooltip:{
+          callbacks:{
+            label(ctx){
+              return ` ${ctx.label}: ₩${won(ctx.parsed)} (${pctOf(ctx.parsed)}%)`;
+            }
+          }
+        }
+      }
     }
   };
 }
@@ -1043,9 +1089,8 @@ function fillAccount(account){
     <div class="item"><div class="label">평가금액</div><div class="val">₩${won(value)}</div></div>
     <div class="item"><div class="label">손익</div><div class="val ${pctClass(pnl)}">${pnl>=0?'+':''}₩${won(pnl)}</div></div>
     <div class="item"><div class="label">보유 종목</div><div class="val">${rows.length}</div></div>`;
-  document.querySelector('#accountTable tbody').innerHTML = rows
-    .sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['자산군','세부자산','종목','위험도','수량','통화','현재가','평가금액(KRW)','매입금액(KRW)','손익','수익률'])).join('');
+  tableRows.accountTable = rows.sort((a,b)=>b.평가금액KRW-a.평가금액KRW);
+  renderMainTbody('accountTable');
 }
 
 function renderCurrencyView(){
@@ -1065,12 +1110,11 @@ function fillCurrency(currency){
   const originalSum = rows.reduce((s,h)=>s + h.수량*h.현재가, 0);
   const krwSum = rows.reduce((s,h)=>s+h.평가금액KRW,0);
   document.getElementById('currencySubtotal').innerHTML = `
-    <div class="item"><div class="label">${currency} 합계</div><div class="val">${currency==='KRW'?'₩':'$'}${fmt2(originalSum)}</div></div>
+    <div class="item"><div class="label">${currency} 합계</div><div class="val">${currency==='KRW'?'₩':currency==='GBP'?'£':'$'}${fmt2(originalSum)}</div></div>
     <div class="item"><div class="label">원화 환산</div><div class="val">₩${won(krwSum)}</div></div>
     <div class="item"><div class="label">보유 종목</div><div class="val">${rows.length}</div></div>`;
-  document.querySelector('#currencyTable tbody').innerHTML = rows
-    .sort((a,b)=>b.평가금액KRW-a.평가금액KRW)
-    .map(h => rowHTML(h, ['계좌','자산군','세부자산','종목','위험도','수량','현재가','평가금액(원화)','매입금액(원화)','손익','수익률'])).join('');
+  tableRows.currencyTable = rows.sort((a,b)=>b.평가금액KRW-a.평가금액KRW);
+  renderMainTbody('currencyTable');
 }
 
 /* ============ 탭 전환 ============ */
@@ -1084,6 +1128,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
+setupSortableHeaders();
 init();
 </script>
 </body>
