@@ -184,12 +184,26 @@
     color:var(--text-dim);
   }
   .table-scroll{overflow-x:auto;}
+  .price-edit{
+    cursor:pointer;
+    border-bottom:1px dashed var(--text-dim);
+  }
+  .price-edit:hover{color:var(--gold);border-bottom-color:var(--gold);}
 
   .pill-row{
     display:flex;
     gap:8px;
     flex-wrap:wrap;
     margin-bottom:18px;
+  }
+  .pill-row.sticky{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--bg);
+    padding:12px 0;
+    margin:0 0 18px;
+    border-bottom:1px solid var(--border);
   }
   .pill{
     padding:8px 16px;
@@ -373,7 +387,7 @@
   </section>
 
   <section id="view-account" class="view">
-    <div class="pill-row" id="accountPills"></div>
+    <div class="pill-row sticky" id="accountPills"></div>
     <div class="subtotal-strip" id="accountSubtotal"></div>
     <div class="card">
       <div class="table-scroll">
@@ -390,7 +404,7 @@
   </section>
 
   <section id="view-currency" class="view">
-    <div class="pill-row" id="currencyPills"></div>
+    <div class="pill-row sticky" id="currencyPills"></div>
     <div class="subtotal-strip" id="currencySubtotal"></div>
     <div class="card">
       <div class="table-scroll">
@@ -463,6 +477,8 @@
 // 시트 헤더(첫 줄)는 반드시 다음 이름을 포함해야 합니다:
 // 계좌명, 자산군, 종목명, 티커, 수량, 통화, 매입단가, 매입일, 위험/안전, 세부자산
 // (위험/안전, 세부자산은 선택 입력 — 비워두면 "-"로 표시됩니다)
+// 현재가는 항상 자동으로 조회하되, 값이 이상할 땐 대시보드에서 현재가를 클릭해 직접 고칠 수 있습니다
+// (수정 값은 이 브라우저에 저장되어 다음에 열어도 유지되고, 빈 값으로 저장하면 다시 자동 조회로 돌아갑니다)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1P6Kb34gzG6dgyNNM7QHqn2UpAsX-gFbp3EG70cttI7o/export?format=csv&gid=0";
 
 // 국내 종목 티커는 야후 파이낸스 형식으로 입력하세요: 코스피는 종목코드+.KS (예: 005930.KS), 코스닥은 .KQ
@@ -578,15 +594,40 @@ async function loadHoldings(){
   })).filter(r => r.계좌명 && r.종목명); // 티커가 없어도(현금 등) 계좌명·종목명만 있으면 포함
 }
 
+// 네이버 증권 — 국내 종목은 야후보다 데이터가 훨씬 정확하고 빠름
+async function fetchQuoteNaver(code){
+  const url = `https://m.stock.naver.com/api/stock/${code}/price?pageSize=2&page=1`;
+  const text = await fetchWithProxies(url);
+  const json = JSON.parse(text);
+  if(!Array.isArray(json) || !json.length) throw new Error('네이버 데이터 없음');
+  const price = parseNum(json[0].closePrice);
+  const prevClose = json[1] ? parseNum(json[1].closePrice) : price;
+  if(!price) throw new Error('네이버 가격 파싱 실패');
+  return { price, prevClose };
+}
+
 async function fetchQuote(ticker){
+  // 국내 종목(.KS/.KQ)은 네이버 증권을 우선 시도 — 실패하면 야후로 폴백
+  const krMatch = ticker.match(/^(.+)\.(KS|KQ)$/i);
+  if(krMatch){
+    try{
+      return await fetchQuoteNaver(krMatch[1]);
+    }catch(e){ /* 네이버 실패 시 아래 야후 로직으로 이어서 진행 */ }
+  }
+
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}`;
   const text = await fetchWithProxies(url);
   const json = JSON.parse(text);
   const meta = json.chart.result[0].meta;
-  return {
-    price: meta.regularMarketPrice,
-    prevClose: meta.chartPreviousClose ?? meta.previousClose,
-  };
+  let price = meta.regularMarketPrice;
+  let prevClose = meta.chartPreviousClose ?? meta.previousClose;
+  // 런던증권거래소(.L) 종목은 야후에서 펜스(GBX) 단위로 시세를 주기 때문에
+  // 파운드(GBP) 기준인 매입단가와 맞추려면 100으로 나눠야 함
+  if(/\.L$/i.test(ticker)){
+    price = price / 100;
+    prevClose = prevClose / 100;
+  }
+  return { price, prevClose };
 }
 
 async function fetchFxRates(){
@@ -778,9 +819,61 @@ document.getElementById('fxExcelBtn').addEventListener('click', () => {
 });
 
 /* ============ 메인 처리 ============ */
+let lastQuoteResults = []; // 마지막으로 조회한 원본 시세 (오버라이드 재계산용, API 재호출 없이 재사용)
+let priceOverrides = {};   // { 티커또는종목명: 수동가격 }, localStorage에 저장됨
+
+function loadOverrides(){
+  try{ priceOverrides = JSON.parse(localStorage.getItem('priceOverrides') || '{}'); }
+  catch(e){ priceOverrides = {}; }
+}
+function saveOverrides(){
+  try{ localStorage.setItem('priceOverrides', JSON.stringify(priceOverrides)); }catch(e){ /* 저장 실패 시 이번 세션에서만 적용 */ }
+}
+const overrideKey = h => h.티커 || h.종목명;
+
+function buildHoldings(results){
+  holdings = results.map(h => {
+    const key = overrideKey(h);
+    const override = priceOverrides[key];
+    const 현재가 = override != null ? override : h.현재가;
+    const 전일종가 = override != null ? override : h.전일종가; // 수동 수정 시 일간등락은 0%로 표시
+    const fx = h.통화 === 'KRW' ? 1 : (fxRates[h.통화] || 1);
+    const 평가금액KRW = h.수량 * 현재가 * fx;
+    const 매입금액KRW = h.수량 * h.매입단가 * fx;
+    const 손익KRW = 평가금액KRW - 매입금액KRW;
+    const 수익률 = h.매입단가 ? ((현재가 - h.매입단가) / h.매입단가) * 100 : 0;
+    const 일간등락 = 전일종가 ? ((현재가 - 전일종가) / 전일종가) * 100 : 0;
+    return {...h, 현재가, 전일종가, 평가금액KRW, 매입금액KRW, 손익KRW, 수익률, 일간등락, 수정됨: override != null};
+  });
+}
+
+function rerenderAll(){
+  renderTicker();
+  renderTotalView();
+  renderAccountView();
+  renderCurrencyView();
+}
+
+function editPrice(key, currentPrice){
+  const input = prompt(`"${key}"의 현재가를 직접 입력하세요.\n(비워두고 확인을 누르면 자동 조회 값으로 되돌립니다)`, currentPrice);
+  if(input === null) return; // 취소
+  const trimmed = input.trim();
+  if(trimmed === ''){
+    delete priceOverrides[key];
+  }else{
+    const num = parseNum(trimmed);
+    if(!num){ alert('숫자를 입력해주세요.'); return; }
+    priceOverrides[key] = num;
+  }
+  saveOverrides();
+  buildHoldings(lastQuoteResults);
+  rerenderAll();
+}
+
 async function init(){
   await fetchFxRates();
   document.getElementById('fxRate').textContent = fxRates.USD ? `₩${won(fxRates.USD)}` : '-';
+  loadOverrides();
 
   const raw = await loadHoldings();
 
@@ -797,22 +890,12 @@ async function init(){
       return {...h, 현재가: h.매입단가, 전일종가: h.매입단가}; // 실패 시 매입단가로 대체
     }
   }));
+  lastQuoteResults = results;
 
-  holdings = results.map(h => {
-    const fx = h.통화 === 'KRW' ? 1 : (fxRates[h.통화] || 1);
-    const 평가금액KRW = h.수량 * h.현재가 * fx;
-    const 매입금액KRW = h.수량 * h.매입단가 * fx;
-    const 손익KRW = 평가금액KRW - 매입금액KRW;
-    const 수익률 = h.매입단가 ? ((h.현재가 - h.매입단가) / h.매입단가) * 100 : 0;
-    const 일간등락 = h.전일종가 ? ((h.현재가 - h.전일종가) / h.전일종가) * 100 : 0;
-    return {...h, 평가금액KRW, 매입금액KRW, 손익KRW, 수익률, 일간등락};
-  });
+  buildHoldings(results);
 
   document.getElementById('loading').style.display = 'none';
-  renderTicker();
-  renderTotalView();
-  renderAccountView();
-  renderCurrencyView();
+  rerenderAll();
 }
 
 /* ============ 렌더링 ============ */
@@ -828,13 +911,16 @@ function renderTicker(){
 function rowHTML(h, cols){
   const pnlCls = pctClass(h.손익KRW);
   const riskCls = h.위험도 === '위험' ? 'up' : h.위험도 === '안전' ? 'down' : '';
+  const key = overrideKey(h);
+  const keyAttr = JSON.stringify(key).replace(/'/g, '&#39;');
+  const editedTag = h.수정됨 ? ' <span class="tag" title="수동으로 고친 값">수정됨</span>' : '';
   const base = {
     계좌: h.계좌명, 자산군: `<span class="tag">${h.자산군}</span>`,
     세부자산: h.세부자산 ? `<span class="tag">${h.세부자산}</span>` : '-',
     종목: h.종목명,
     위험도: h.위험도 ? `<span class="${riskCls}">${h.위험도}</span>` : '-',
     수량: h.수량.toLocaleString('ko-KR'), 통화: h.통화,
-    현재가: `${h.통화 === 'KRW' ? '₩' : '$'}${fmt2(h.현재가)}`,
+    현재가: `<span class="price-edit" title="클릭해서 현재가 직접 수정" onclick='editPrice(${keyAttr}, ${h.현재가})'>${h.통화 === 'KRW' ? '₩' : '$'}${fmt2(h.현재가)}✎</span>${editedTag}`,
     '평가금액(KRW)': `₩${won(h.평가금액KRW)}`,
     '평가금액(원화)': `₩${won(h.평가금액KRW)}`,
     '매입금액(KRW)': `₩${won(h.매입금액KRW)}`,
