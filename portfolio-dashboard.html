@@ -159,8 +159,19 @@
   }
   thead th[data-key]{cursor:pointer; user-select:none;}
   thead th[data-key]:hover{color:var(--text);}
-  thead th[data-key].sorted::after{content:" ▾"; color:var(--gold);}
+  thead th[data-key].sorted-desc::after{content:" ▾"; color:var(--gold);}
+  thead th[data-key].sorted-asc::after{content:" ▴"; color:var(--gold);}
   .table-scroll{overflow-x:auto;}
+  .rs-select{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:14px;
+    padding:9px 14px;
+    border-radius:8px;
+  }
+  .rs-select:focus{outline:1px solid var(--gold);}
   .price-edit{
     cursor:pointer;
     border-bottom:1px dashed var(--text-dim);
@@ -332,6 +343,7 @@
   <button class="tab-btn" data-view="account">계좌별</button>
   <button class="tab-btn" data-view="currency">통화별</button>
   <button class="tab-btn" data-view="fx">환율</button>
+  <button class="tab-btn" data-view="rs">RS분석</button>
 </nav>
 
 <main>
@@ -442,6 +454,41 @@
         </div>
         <div class="source-note">출처: Yahoo Finance 종가 기준 시장환율(KRW=X, GBPKRW=X) · 서울외국환중개 매매기준율과는 소폭(보통 몇 원 이내) 차이가 있을 수 있습니다. 달러지수: Yahoo Finance(DX-Y.NYB)</div>
       </div>
+    </div>
+  </section>
+
+  <section id="view-rs" class="view">
+    <div class="fx-actions">
+      <select id="rsStockSelect" class="rs-select"></select>
+    </div>
+    <div class="pill-row" id="rsPeriodPills">
+      <button class="pill" data-period="1w">1주일</button>
+      <button class="pill" data-period="1m">1개월</button>
+      <button class="pill active" data-period="3m">3개월</button>
+      <button class="pill" data-period="6m">6개월</button>
+      <button class="pill" data-period="ytd">YTD</button>
+      <button class="pill" data-period="1y">1년</button>
+    </div>
+    <div class="pill-row" id="rsBenchmarkPills">
+      <button class="pill active" data-bm="KOSPI">코스피</button>
+      <button class="pill" data-bm="SP500">S&amp;P500</button>
+      <button class="pill" data-bm="NASDAQ100">나스닥100</button>
+    </div>
+
+    <div id="rsProgress" class="fx-progress" style="display:none;">RS 데이터를 불러오는 중입니다…</div>
+
+    <div id="rsContent" style="display:none;">
+      <div class="fx-cards">
+        <div class="fx-card"><div class="label">종목 수익률</div><div class="val" id="rsStockReturn">-</div></div>
+        <div class="fx-card"><div class="label">벤치마크 수익률</div><div class="val" id="rsBenchReturn">-</div></div>
+        <div class="fx-card"><div class="label">초과수익(알파)</div><div class="val" id="rsAlpha">-</div></div>
+        <div class="fx-card"><div class="label">RS 평가</div><div class="val" id="rsRating">-</div></div>
+      </div>
+      <div class="card">
+        <h3 id="rsChartTitle">누적 수익률 비교</h3>
+        <div class="chart-holder" style="height:320px;"><canvas id="rsChart"></canvas></div>
+      </div>
+      <div class="source-note" style="margin-top:10px;">종목·벤치마크 모두 선택한 기간 시작일 종가를 100으로 맞춰 정규화한 누적 수익률입니다. 초과수익(알파) = 종목 수익률 − 벤치마크 수익률. 참고용 계산이며 투자 조언이 아닙니다.</div>
     </div>
   </section>
 </main>
@@ -660,9 +707,9 @@ async function loadFxDataAtStartup(){
 const isoDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const FX_TICKERS = { USD: 'KRW=X', GBP: 'GBPKRW=X' };
 
-async function fetchYahooHistory(ticker){
-  const period1 = Math.floor(new Date(FX_START_DATE + 'T00:00:00Z').getTime() / 1000);
-  const period2 = Math.floor(Date.now() / 1000);
+async function fetchYahooHistory(ticker, period1, period2){
+  period1 = period1 ?? Math.floor(new Date(FX_START_DATE + 'T00:00:00Z').getTime() / 1000);
+  period2 = period2 ?? Math.floor(Date.now() / 1000);
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${period1}&period2=${period2}&interval=1d`;
   const text = await fetchWithProxies(url);
   const json = JSON.parse(text);
@@ -683,6 +730,157 @@ async function fetchFxHistory(curUnit){
 async function fetchDollarIndexHistory(){
   return fetchYahooHistory('DX-Y.NYB'); // [{date, value}]
 }
+
+/* ============ RS(상대강도) 분석 탭 ============ */
+const RS_BENCHMARK_TICKERS = { KOSPI: '^KS11', SP500: '^GSPC', NASDAQ100: '^NDX' };
+const RS_BENCHMARK_LABELS = { KOSPI: '코스피', SP500: 'S&P500', NASDAQ100: '나스닥100' };
+
+function rsPeriodStart(periodKey){
+  const d = new Date();
+  switch(periodKey){
+    case '1w': d.setDate(d.getDate() - 7); break;
+    case '1m': d.setMonth(d.getMonth() - 1); break;
+    case '3m': d.setMonth(d.getMonth() - 3); break;
+    case '6m': d.setMonth(d.getMonth() - 6); break;
+    case 'ytd': return new Date(d.getFullYear(), 0, 1);
+    case '1y': d.setFullYear(d.getFullYear() - 1); break;
+    default: d.setMonth(d.getMonth() - 3);
+  }
+  return d;
+}
+
+// series: [{date, value}] 오름차순 정렬 가정. dateStr 이하인 마지막 값을 찾음(휴장일 보정)
+function rsNearestValue(series, dateStr){
+  let best = null;
+  for(const r of series){
+    if(r.date <= dateStr) best = r; else break;
+  }
+  return best ? best.value : null;
+}
+
+let rsStockOptions = []; // [{ticker, label}]
+let rsChartInstance = null;
+let rsLoaded = false;
+
+function populateRsStockSelect(){
+  const seen = new Set();
+  rsStockOptions = holdings
+    .filter(h => h.티커) // 현금성 자산은 제외
+    .filter(h => { if(seen.has(h.티커)) return false; seen.add(h.티커); return true; })
+    .map(h => ({ ticker: h.티커, label: `${h.종목명} (${h.계좌명})` }));
+  const sel = document.getElementById('rsStockSelect');
+  sel.innerHTML = rsStockOptions.map(o => `<option value="${o.ticker}">${o.label}</option>`).join('');
+}
+
+function loadRSTab(){
+  const prevSelection = document.getElementById('rsStockSelect').value;
+  populateRsStockSelect();
+  if(prevSelection && rsStockOptions.some(o => o.ticker === prevSelection)){
+    document.getElementById('rsStockSelect').value = prevSelection;
+  }
+  if(rsStockOptions.length && !rsLoaded){
+    rsLoaded = true;
+    runRSAnalysis();
+  }
+}
+
+async function runRSAnalysis(){
+  const ticker = document.getElementById('rsStockSelect').value;
+  if(!ticker) return;
+  const periodKey = document.querySelector('#rsPeriodPills .pill.active').dataset.period;
+  const bmKey = document.querySelector('#rsBenchmarkPills .pill.active').dataset.bm;
+
+  document.getElementById('rsProgress').style.display = 'block';
+  document.getElementById('rsContent').style.display = 'none';
+
+  const start = rsPeriodStart(periodKey);
+  const period1 = Math.floor(start.getTime() / 1000);
+  const period2 = Math.floor(Date.now() / 1000);
+
+  const [stockSeries, benchSeries] = await Promise.all([
+    fetchYahooHistory(ticker, period1, period2).catch(() => []),
+    fetchYahooHistory(RS_BENCHMARK_TICKERS[bmKey], period1, period2).catch(() => []),
+  ]);
+
+  document.getElementById('rsProgress').style.display = 'none';
+
+  if(!stockSeries.length || !benchSeries.length){
+    document.getElementById('rsProgress').style.display = 'block';
+    document.getElementById('rsProgress').textContent = '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
+    return;
+  }
+  document.getElementById('rsContent').style.display = 'block';
+
+  // 종목 거래일 캘린더를 기준으로 벤치마크 값을 매칭(가장 가까운 이전 값 사용)
+  const base = stockSeries[0].value;
+  const bmBase = rsNearestValue(benchSeries, stockSeries[0].date) ?? benchSeries[0].value;
+
+  const stockLabel = rsStockOptions.find(o => o.ticker === ticker)?.label || ticker;
+  const points = stockSeries.map(r => {
+    const bmRaw = rsNearestValue(benchSeries, r.date) ?? bmBase;
+    return {
+      date: r.date,
+      stockNorm: (r.value / base) * 100,
+      benchNorm: (bmRaw / bmBase) * 100,
+    };
+  });
+
+  const stockReturn = points[points.length-1].stockNorm - 100;
+  const benchReturn = points[points.length-1].benchNorm - 100;
+  const alpha = stockReturn - benchReturn;
+
+  document.getElementById('rsStockReturn').innerHTML = `<span class="${pctClass(stockReturn)}">${pctSign(stockReturn)}${stockReturn.toFixed(2)}%</span>`;
+  document.getElementById('rsBenchReturn').innerHTML = `<span class="${pctClass(benchReturn)}">${pctSign(benchReturn)}${benchReturn.toFixed(2)}%</span>`;
+  document.getElementById('rsAlpha').innerHTML = `<span class="${pctClass(alpha)}">${pctSign(alpha)}${alpha.toFixed(2)}%p</span>`;
+
+  let rating, ratingCls;
+  if(alpha >= 10){ rating = '강한 아웃퍼폼'; ratingCls = 'up'; }
+  else if(alpha >= 2){ rating = '아웃퍼폼'; ratingCls = 'up'; }
+  else if(alpha > -2){ rating = '벤치마크 수준'; ratingCls = ''; }
+  else if(alpha > -10){ rating = '언더퍼폼'; ratingCls = 'down'; }
+  else { rating = '강한 언더퍼폼'; ratingCls = 'down'; }
+  document.getElementById('rsRating').innerHTML = `<span class="${ratingCls}">${rating}</span>`;
+
+  document.getElementById('rsChartTitle').textContent = `${stockLabel} vs ${RS_BENCHMARK_LABELS[bmKey]} — 누적 수익률`;
+
+  if(rsChartInstance) rsChartInstance.destroy();
+  rsChartInstance = new Chart(document.getElementById('rsChart'), {
+    type:'line',
+    data:{
+      labels: points.map(p => p.date),
+      datasets:[
+        {
+          label: stockLabel, data: points.map(p => p.stockNorm),
+          borderColor:'#d4a24c', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:0.1,
+        },
+        {
+          label: RS_BENCHMARK_LABELS[bmKey], data: points.map(p => p.benchNorm),
+          borderColor:'#8b93a1', backgroundColor:'transparent', borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0.1,
+        },
+      ]
+    },
+    options:{
+      maintainAspectRatio:false,
+      scales:{
+        x:{ticks:{color:'#8b93a1', maxTicksLimit:8, font:{size:10}}, grid:{display:false}},
+        y:{ticks:{color:'#8b93a1', font:{size:10}, callback:v=>v.toFixed(0)}, grid:{color:'#ffffff0a'}}
+      },
+      plugins:{legend:{position:'top', labels:{color:'#8b93a1', font:{size:11}, boxWidth:12}}}
+    }
+  });
+}
+
+document.getElementById('rsStockSelect').addEventListener('change', runRSAnalysis);
+document.getElementById('rsPeriodPills').querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => {
+  document.getElementById('rsPeriodPills').querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');
+  runRSAnalysis();
+}));
+document.getElementById('rsBenchmarkPills').querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => {
+  document.getElementById('rsBenchmarkPills').querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');
+  runRSAnalysis();
+}));
 
 // 야후 환율/지수는 거의 24시간 움직이기 때문에, 그날 데이터를 그대로 쓰면
 // 열 때마다 값이 바뀐다. 오늘 날짜는 제외하고 마지막으로 "마감된" 날짜를 고정값으로 사용한다.
@@ -895,33 +1093,46 @@ function renderFxTbody(){
   document.querySelector('#fxTable tbody').innerHTML = tableRows.fxTable
     .map(r => `<tr><td>${r.date}</td><td class="num mono">${fmt2(r.rate)}</td></tr>`).join('');
 }
-function sortRowsDesc(rows, key){
+let sortState = {}; // { tableId: {key, dir} }
+
+function sortRows(rows, key, dir){
   return [...rows].sort((a,b) => {
     const av = a[key], bv = b[key];
+    let cmp;
     if(typeof av === 'string' || typeof bv === 'string'){
-      return String(bv).localeCompare(String(av), 'ko');
+      cmp = String(av ?? '').localeCompare(String(bv ?? ''), 'ko');
+    }else{
+      cmp = (av ?? 0) - (bv ?? 0);
     }
-    return (bv ?? 0) - (av ?? 0);
+    return dir === 'asc' ? cmp : -cmp;
   });
 }
-function markSortedHeader(activeTh){
-  activeTh.closest('tr').querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
-  activeTh.classList.add('sorted');
+function markSortedHeader(activeTh, dir){
+  activeTh.closest('tr').querySelectorAll('th').forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
+  activeTh.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
 }
 function setupSortableHeaders(){
   document.querySelectorAll('#totalTable thead th[data-key], #accountTable thead th[data-key], #currencyTable thead th[data-key]').forEach(th => {
     th.addEventListener('click', () => {
       const tableId = th.closest('table').id;
-      tableRows[tableId] = sortRowsDesc(tableRows[tableId], th.dataset.key);
+      const key = th.dataset.key;
+      const prev = sortState[tableId];
+      const dir = (prev && prev.key === key && prev.dir === 'desc') ? 'asc' : 'desc';
+      sortState[tableId] = {key, dir};
+      tableRows[tableId] = sortRows(tableRows[tableId], key, dir);
       renderMainTbody(tableId);
-      markSortedHeader(th);
+      markSortedHeader(th, dir);
     });
   });
   document.querySelectorAll('#fxTable thead th[data-key]').forEach(th => {
     th.addEventListener('click', () => {
-      tableRows.fxTable = sortRowsDesc(tableRows.fxTable, th.dataset.key);
+      const key = th.dataset.key;
+      const prev = sortState.fxTable;
+      const dir = (prev && prev.key === key && prev.dir === 'desc') ? 'asc' : 'desc';
+      sortState.fxTable = {key, dir};
+      tableRows.fxTable = sortRows(tableRows.fxTable, key, dir);
       renderFxTbody();
-      markSortedHeader(th);
+      markSortedHeader(th, dir);
     });
   });
 }
@@ -1125,6 +1336,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(`view-${btn.dataset.view}`).classList.add('active');
     if(btn.dataset.view === 'fx') loadFxTab();
+    if(btn.dataset.view === 'rs') loadRSTab();
   });
 });
 
