@@ -480,9 +480,64 @@
   .ta-insight.show{opacity:1;transform:translateY(0);}
   .ta-insight-title{font-weight:700;color:var(--text);margin-bottom:0.3rem;}
   .ta-footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:0.75rem;}
+
+  /* ---------- 비밀번호 잠금 ---------- */
+  #pwGate{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .pw-box{
+    width:100%;
+    max-width:320px;
+    padding:0 24px;
+    text-align:center;
+  }
+  .pw-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;}
+  .pw-sub{font-size:13px;color:var(--text-dim);margin-bottom:20px;}
+  .pw-input{
+    width:100%;
+    padding:11px 14px;
+    border:1px solid var(--border-strong);
+    border-radius:0;
+    font-size:14px;
+    font-family:'Pretendard',sans-serif;
+    margin-bottom:10px;
+    color:var(--text);
+    background:#FFFFFF;
+  }
+  .pw-input:focus{outline:2px solid var(--accent);}
+  .pw-btn{
+    width:100%;
+    padding:11px;
+    background:var(--accent);
+    color:#FFFFFF;
+    border:none;
+    border-radius:0;
+    font-size:14px;
+    font-weight:700;
+    font-family:'Pretendard',sans-serif;
+    cursor:pointer;
+  }
+  .pw-btn:hover{background:#25B562;}
+  .pw-error{min-height:18px;font-size:12px;color:var(--down);margin-top:10px;}
 </style>
 </head>
 <body>
+
+<div id="pwGate">
+  <form id="pwForm" class="pw-box">
+    <div class="pw-title">포트폴리오 대시보드</div>
+    <div class="pw-sub">비밀번호를 입력하세요</div>
+    <input type="password" id="pwInput" class="pw-input" autocomplete="off" autofocus />
+    <button type="submit" class="pw-btn">확인</button>
+    <div class="pw-error" id="pwError"></div>
+  </form>
+</div>
 
 <div id="config-banner">
   ⚙️ Google 시트가 아직 연결되지 않았습니다. 데모 데이터로 표시 중입니다.
@@ -1823,8 +1878,24 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-setupSortableHeaders();
-init();
+/* ============ 비밀번호 잠금 ============ */
+// 이 값만 바꾸면 비밀번호를 변경/무효화할 수 있습니다 (예전 비밀번호를 가진 사람은 더 이상 못 들어옵니다).
+// 참고: 페이지 소스를 보면 이 값이 그대로 보이므로 완전한 보안은 아니며, 가벼운 접근 제한용입니다.
+const DASH_PASSWORD = "changeme";
+
+document.getElementById('pwForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const val = document.getElementById('pwInput').value;
+  if(val === DASH_PASSWORD){
+    document.getElementById('pwGate').style.display = 'none';
+    setupSortableHeaders();
+    init();
+  }else{
+    document.getElementById('pwError').textContent = '비밀번호가 올바르지 않습니다.';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+});
 </script>
 </body>
 </html>
