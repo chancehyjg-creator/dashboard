@@ -4,43 +4,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포트폴리오 시세판</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
-    --bg:#14171c;
-    --surface:#1b1f27;
-    --surface-2:#232936;
-    --border:#2a3140;
-    --text:#eef1f5;
-    --text-dim:#8b93a1;
-    --up:#e5484d;      /* 상승 = 빨강 (국내 관행) */
-    --down:#4c8bf5;    /* 하락 = 파랑 (국내 관행) */
-    --gold:#d4a24c;
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-2:#F2F2F2;
+    --border:#D9D9D9;
+    --border-strong:#000000;
+    --text:#000000;
+    --text-dim:#6B6B6B;
+    --up:#2DCC70;      /* 상승/이익 = 그린(첨부 컬러) */
+    --down:#1A1A1A;    /* 하락/손실 = 블랙 */
+    --accent:#2DCC70;  /* 유일한 포인트 컬러 */
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:var(--bg);
     color:var(--text);
-    font-family:'Noto Sans KR',sans-serif;
+    font-family:'Pretendard',sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  .mono{font-family:'IBM Plex Mono',monospace;}
+  .mono{font-family:'Pretendard',sans-serif; font-variant-numeric:tabular-nums;}
 
   /* ---------- 설정 필요 배너 ---------- */
   #config-banner{
     display:none;
-    background:#3a2a1a;
-    color:#f0c98a;
-    border-bottom:1px solid #5a4222;
+    background:#FFFFFF;
+    color:#000000;
+    border-bottom:2px solid var(--accent);
     padding:12px 20px;
     font-size:13px;
     line-height:1.6;
   }
-  #config-banner code{background:#00000040;padding:1px 6px;border-radius:4px;}
+  #config-banner code{background:var(--surface-2);padding:1px 6px;border:1px solid var(--border);}
 
   header.hero{
     padding:36px 24px 24px;
@@ -53,11 +53,12 @@
     letter-spacing:.14em;
     text-transform:uppercase;
     margin-bottom:10px;
+    font-weight:600;
   }
   .total-value{
     font-size:clamp(34px,6vw,58px);
-    font-weight:700;
-    letter-spacing:-0.01em;
+    font-weight:800;
+    letter-spacing:-0.02em;
   }
   .total-sub{
     display:flex;
@@ -67,7 +68,7 @@
     font-size:14px;
     color:var(--text-dim);
   }
-  .total-sub .stat-val{color:var(--text);font-weight:600;}
+  .total-sub .stat-val{color:var(--text);font-weight:700;}
   .up{color:var(--up);}
   .down{color:var(--down);}
 
@@ -77,21 +78,23 @@
     max-width:1180px;
     margin:0 auto;
     padding:0 24px;
+    border-bottom:1px solid var(--border);
   }
   nav.tabs button{
     background:none;
     border:none;
     color:var(--text-dim);
-    font-family:'Noto Sans KR',sans-serif;
+    font-family:'Pretendard',sans-serif;
     font-size:14px;
-    font-weight:500;
+    font-weight:600;
     padding:10px 16px;
     border-bottom:2px solid transparent;
+    margin-bottom:-1px;
     cursor:pointer;
   }
   nav.tabs button.active{
     color:var(--text);
-    border-bottom-color:var(--gold);
+    border-bottom-color:var(--accent);
   }
 
   main{
@@ -113,7 +116,7 @@
   .card{
     background:var(--surface);
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:0;
     padding:20px;
   }
   .card h3{
@@ -122,7 +125,7 @@
     letter-spacing:.06em;
     text-transform:uppercase;
     color:var(--text-dim);
-    font-weight:600;
+    font-weight:700;
   }
   .chart-holder{height:220px;position:relative;}
 
@@ -134,78 +137,83 @@
   thead th{
     text-align:left;
     color:var(--text-dim);
-    font-weight:500;
+    font-weight:700;
     font-size:12px;
     letter-spacing:.04em;
     text-transform:uppercase;
     padding:8px 10px;
-    border-bottom:1px solid var(--border);
+    border-bottom:2px solid var(--border-strong);
     white-space:nowrap;
   }
   tbody td{
     padding:11px 10px;
-    border-bottom:1px solid #ffffff08;
+    border-bottom:1px solid var(--border);
     white-space:nowrap;
   }
   tbody tr:hover{background:var(--surface-2);}
-  td.num,th.num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+  td.num,th.num{text-align:right;font-family:'Pretendard',sans-serif; font-variant-numeric:tabular-nums;}
   .tag{
     display:inline-block;
     font-size:11px;
     padding:2px 8px;
-    border-radius:20px;
-    background:#2a3140;
+    border-radius:0;
+    border:1px solid var(--border);
+    background:var(--surface-2);
     color:var(--text-dim);
   }
   thead th[data-key]{cursor:pointer; user-select:none;}
   thead th[data-key]:hover{color:var(--text);}
-  thead th[data-key].sorted-desc::after{content:" ▾"; color:var(--gold);}
-  thead th[data-key].sorted-asc::after{content:" ▴"; color:var(--gold);}
+  thead th[data-key].sorted-desc::after{content:" ▾"; color:var(--accent);}
+  thead th[data-key].sorted-asc::after{content:" ▴"; color:var(--accent);}
   .table-scroll{overflow-x:auto;}
   .rs-select{
     background:var(--surface);
-    border:1px solid var(--border);
+    border:1px solid var(--border-strong);
     color:var(--text);
-    font-family:'Noto Sans KR',sans-serif;
+    font-family:'Pretendard',sans-serif;
     font-size:14px;
     padding:9px 14px;
-    border-radius:8px;
+    border-radius:0;
   }
-  .rs-select:focus{outline:1px solid var(--gold);}
+  .rs-select:focus{outline:2px solid var(--accent);}
   .price-edit{
     cursor:pointer;
     border-bottom:1px dashed var(--text-dim);
   }
-  .price-edit:hover{color:var(--gold);border-bottom-color:var(--gold);}
+  .price-edit:hover{color:var(--accent);border-bottom-color:var(--accent);}
 
   .pill-row{
     display:flex;
-    gap:8px;
+    gap:0;
     flex-wrap:wrap;
     margin-bottom:18px;
+    border-bottom:1px solid var(--border);
   }
   .pill-row.sticky{
     position:sticky;
     top:0;
     z-index:20;
     background:var(--bg);
-    padding:12px 0;
+    padding:12px 0 0;
     margin:0 0 18px;
     border-bottom:1px solid var(--border);
   }
   .pill{
-    padding:8px 16px;
-    border-radius:20px;
-    border:1px solid var(--border);
-    background:var(--surface);
+    padding:9px 18px;
+    border-radius:0;
+    border:none;
+    border-bottom:2px solid transparent;
+    background:none;
     color:var(--text-dim);
+    font-family:'Pretendard',sans-serif;
     font-size:13px;
+    font-weight:600;
     cursor:pointer;
   }
   .pill.active{
-    border-color:var(--gold);
-    color:var(--gold);
-    background:#d4a24c14;
+    border-bottom-color:var(--accent);
+    color:var(--text);
+    background:none;
   }
 
   .subtotal-strip{
@@ -216,10 +224,10 @@
     padding:16px 20px;
     background:var(--surface);
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:0;
   }
   .subtotal-strip .item .label{font-size:12px;color:var(--text-dim);margin-bottom:4px;}
-  .subtotal-strip .item .val{font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+  .subtotal-strip .item .val{font-size:20px;font-weight:700;font-family:'Pretendard',sans-serif;}
 
   #loading{
     padding:80px 24px;
@@ -237,23 +245,23 @@
   .fx-card{
     background:var(--surface);
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:0;
     padding:16px 18px;
   }
   .fx-card .label{font-size:12px;color:var(--text-dim);margin-bottom:8px;}
-  .fx-card .val{font-size:22px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+  .fx-card .val{font-size:22px;font-weight:700;font-family:'Pretendard',sans-serif;}
   .signal-badge{
     display:inline-flex;
     align-items:center;
     gap:8px;
     padding:14px 20px;
-    border-radius:10px;
+    border-radius:0;
     font-size:20px;
-    font-weight:700;
-    font-family:'IBM Plex Mono',monospace;
+    font-weight:800;
+    font-family:'Pretendard',sans-serif;
   }
-  .signal-buy{background:#3a1418;color:var(--up);border:1px solid #5a1f26;}
-  .signal-wait{background:#12203a;color:var(--down);border:1px solid #1f3a5a;}
+  .signal-buy{background:#FFFFFF;color:var(--up);border:2px solid var(--up);}
+  .signal-wait{background:#FFFFFF;color:var(--down);border:2px solid var(--border-strong);}
   .signal-conditions{
     margin-top:12px;
     display:flex;
@@ -272,15 +280,15 @@
   }
   .fx-progress .bar-track{
     max-width:320px;
-    height:6px;
+    height:4px;
     background:var(--surface-2);
-    border-radius:3px;
+    border-radius:0;
     margin:14px auto 0;
     overflow:hidden;
   }
   .fx-progress .bar-fill{
     height:100%;
-    background:var(--gold);
+    background:var(--accent);
     width:0%;
     transition:width .2s;
   }
@@ -294,26 +302,29 @@
   }
   .btn-ghost{
     background:none;
-    border:1px solid var(--border);
+    border:1px solid var(--border-strong);
     color:var(--text);
     padding:8px 16px;
-    border-radius:8px;
+    border-radius:0;
     font-size:13px;
-    font-family:'Noto Sans KR',sans-serif;
+    font-family:'Pretendard',sans-serif;
+    font-weight:600;
     cursor:pointer;
   }
-  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
   .source-note{
     font-size:11.5px;
     color:var(--text-dim);
     margin-top:8px;
   }
   .fx-table-wrap{max-height:360px;overflow-y:auto;}
+  .rs-select{margin-top:0;}
   footer{
     text-align:center;
     color:var(--text-dim);
     font-size:12px;
     padding:30px 20px 50px;
+    border-top:1px solid var(--border);
   }
 </style>
 </head>
@@ -851,21 +862,21 @@ async function runRSAnalysis(){
       datasets:[
         {
           label: stockLabel, data: points.map(p => p.stockNorm),
-          borderColor:'#d4a24c', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:0.1,
+          borderColor:'#2DCC70', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, tension:0.1,
         },
         {
           label: RS_BENCHMARK_LABELS[bmKey], data: points.map(p => p.benchNorm),
-          borderColor:'#8b93a1', backgroundColor:'transparent', borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0.1,
+          borderColor:'#1A1A1A', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], pointRadius:0, tension:0.1,
         },
       ]
     },
     options:{
       maintainAspectRatio:false,
       scales:{
-        x:{ticks:{color:'#8b93a1', maxTicksLimit:8, font:{size:10}}, grid:{display:false}},
-        y:{ticks:{color:'#8b93a1', font:{size:10}, callback:v=>v.toFixed(0)}, grid:{color:'#ffffff0a'}}
+        x:{ticks:{color:'#6B6B6B', maxTicksLimit:8, font:{size:10}}, grid:{display:false}},
+        y:{ticks:{color:'#6B6B6B', font:{size:10}, callback:v=>v.toFixed(0)}, grid:{color:'#00000012'}}
       },
-      plugins:{legend:{position:'top', labels:{color:'#8b93a1', font:{size:11}, boxWidth:12}}}
+      plugins:{legend:{position:'top', labels:{color:'#6B6B6B', font:{size:11}, boxWidth:12}}}
     }
   });
 }
@@ -1002,8 +1013,8 @@ function renderFxCurrency(curUnit){
       datasets:[{
         label:`${curUnit}/KRW`,
         data: sorted.map(r => r.rate),
-        borderColor:'#d4a24c',
-        backgroundColor:'#d4a24c22',
+        borderColor:'#2DCC70',
+        backgroundColor:'#2DCC7022',
         borderWidth:1.5,
         pointRadius:0,
         tension:0.15,
@@ -1013,8 +1024,8 @@ function renderFxCurrency(curUnit){
     options:{
       maintainAspectRatio:false,
       scales:{
-        x:{ticks:{color:'#8b93a1', maxTicksLimit:8, font:{size:10}}, grid:{display:false}},
-        y:{ticks:{color:'#8b93a1', font:{size:10}}, grid:{color:'#ffffff0a'}}
+        x:{ticks:{color:'#6B6B6B', maxTicksLimit:8, font:{size:10}}, grid:{display:false}},
+        y:{ticks:{color:'#6B6B6B', font:{size:10}}, grid:{color:'#00000012'}}
       },
       plugins:{legend:{display:false}}
     }
@@ -1238,7 +1249,7 @@ function groupSum(arr, key){
 }
 
 function donutConfig(map){
-  const palette = ['#d4a24c','#e5484d','#4c8bf5','#7dd3a8','#a78bfa','#f0a868','#8b93a1'];
+  const palette = ['#2DCC70','#000000','#6B6B6B','#B0B0B0','#1F8A52','#D9D9D9','#404040'];
   const labels = Object.keys(map);
   const values = Object.values(map);
   const total = values.reduce((s,v) => s+v, 0);
@@ -1247,7 +1258,7 @@ function donutConfig(map){
     type:'doughnut',
     data:{
       labels,
-      datasets:[{data:values, backgroundColor:palette, borderColor:'#1b1f27', borderWidth:2}]
+      datasets:[{data:values, backgroundColor:palette, borderColor:'#FFFFFF', borderWidth:2}]
     },
     options:{
       maintainAspectRatio:false,
@@ -1255,7 +1266,7 @@ function donutConfig(map){
         legend:{
           position:'right',
           labels:{
-            color:'#8b93a1', font:{size:11}, boxWidth:10,
+            color:'#6B6B6B', font:{size:11}, boxWidth:10,
             generateLabels(chart){
               const ds = chart.data.datasets[0];
               return chart.data.labels.map((label,i) => ({
