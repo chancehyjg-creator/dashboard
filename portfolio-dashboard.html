@@ -292,6 +292,44 @@
     width:0%;
     transition:width .2s;
   }
+  .fx-period-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    padding:14px 16px;
+    margin-bottom:16px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+  }
+  .fx-period-label{
+    font-size:12.5px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .fx-period-label span{color:var(--text);font-family:'Pretendard',sans-serif;}
+  #fxPeriodSlider{
+    flex:1 1 160px;
+    min-width:120px;
+    accent-color:var(--accent);
+    cursor:pointer;
+  }
+  .fx-period-presets{display:flex;gap:6px;flex-wrap:wrap;}
+  .fx-period-preset{
+    padding:5px 12px;
+    border:1px solid var(--border-strong);
+    background:#FFFFFF;
+    color:var(--text-dim);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Pretendard',sans-serif;
+  }
+  .fx-period-preset:hover, .fx-period-preset.active{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
   .fx-actions{
     display:flex;
     justify-content:space-between;
@@ -639,6 +677,19 @@
       <button class="btn-ghost" id="fxExcelBtn">엑셀 다운로드</button>
     </div>
 
+    <div class="fx-period-row" id="fxPeriodRow">
+      <label for="fxPeriodSlider" class="fx-period-label">
+        비교 기간: <span id="fxPeriodDays">364</span>일 (<span id="fxPeriodWeeks">52</span>주)
+      </label>
+      <input type="range" id="fxPeriodSlider" min="14" max="364" step="1" value="364" />
+      <div class="fx-period-presets">
+        <button type="button" class="fx-period-preset" data-days="60">60일</button>
+        <button type="button" class="fx-period-preset" data-days="90">90일</button>
+        <button type="button" class="fx-period-preset" data-days="180">180일</button>
+        <button type="button" class="fx-period-preset active" data-days="364">52주(기본)</button>
+      </div>
+    </div>
+
     <div id="fxProgress" class="fx-progress" style="display:none;">
       환율 데이터를 불러오는 중입니다…
       <div class="bar-track"><div class="bar-fill" id="fxBarFill"></div></div>
@@ -648,9 +699,9 @@
     <div id="fxContent" style="display:none;">
       <div class="fx-cards">
         <div class="fx-card"><div class="label">현재 환율</div><div class="val" id="fxCurrentRate">-</div></div>
-        <div class="fx-card"><div class="label">52주 평균 환율</div><div class="val" id="fx52wRate">-</div></div>
+        <div class="fx-card"><div class="label" id="fxAvgRateLabel">평균 환율</div><div class="val" id="fx52wRate">-</div></div>
         <div class="fx-card" id="fxIndexCardCurrent"><div class="label">현재 달러지수</div><div class="val" id="fxCurrentIndex">-</div></div>
-        <div class="fx-card" id="fxIndexCard52w"><div class="label">52주 평균 달러지수</div><div class="val" id="fx52wIndex">-</div></div>
+        <div class="fx-card" id="fxIndexCard52w"><div class="label" id="fxAvgIndexLabel">평균 달러지수</div><div class="val" id="fx52wIndex">-</div></div>
       </div>
 
       <div class="grid-2" id="fxSignalRow">
@@ -1430,9 +1481,11 @@ function latestStableEntry(series){
   return stable.length ? stable[stable.length - 1] : sorted[sorted.length - 1];
 }
 
-function avgLast52w(series, valueKey){
+let fxLookbackDays = 364; // 기본 52주, 슬라이더로 조정 가능
+
+function avgOverPeriod(series, valueKey, days){
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 364);
+  cutoff.setDate(cutoff.getDate() - (days ?? fxLookbackDays));
   const window = series.filter(r => new Date(r.date) >= cutoff);
   if(!window.length) return null;
   return window.reduce((s,r) => s + r[valueKey], 0) / window.length;
@@ -1501,7 +1554,6 @@ function renderFxCurrency(curUnit){
   document.getElementById('fxIndexCard52w').style.display = isUSD ? '' : 'none';
   document.getElementById('fxSignalRow').style.gridTemplateColumns = isUSD ? '' : '1fr';
   document.getElementById('fxSignalBadge').parentElement.style.display = isUSD ? '' : 'none';
-  document.getElementById('fxChartTitle').textContent = `${curUnit}/KRW 추이`;
   document.getElementById('fxTableTitle').textContent = `${curUnit} 일별 시장환율`;
 
   if(!series.length){
@@ -1510,14 +1562,19 @@ function renderFxCurrency(curUnit){
   }
   const sorted = [...series].sort((a,b) => a.date.localeCompare(b.date));
   const current = latestStableEntry(series);
-  const avgRate = avgLast52w(sorted, 'rate');
+  const avgRate = avgOverPeriod(sorted, 'rate');
+
+  const weeks = Math.round(fxLookbackDays / 7);
+  document.getElementById('fxChartTitle').textContent = `${curUnit}/KRW 추이 (최근 ${fxLookbackDays}일)`;
+  document.getElementById('fxAvgRateLabel').textContent = `평균 환율 (${fxLookbackDays}일=${weeks}주)`;
+  document.getElementById('fxAvgIndexLabel').textContent = `평균 달러지수 (${fxLookbackDays}일=${weeks}주)`;
 
   document.getElementById('fxCurrentRate').textContent = `₩${fmt2(current.rate)}`;
   document.getElementById('fx52wRate').textContent = avgRate ? `₩${fmt2(avgRate)}` : '-';
 
   if(isUSD){
     const curIndex = dollarIndexHistory.length ? latestStableEntry(dollarIndexHistory).value : null;
-    const avgIndex = avgLast52w(dollarIndexHistory, 'value');
+    const avgIndex = avgOverPeriod(dollarIndexHistory, 'value');
     document.getElementById('fxCurrentIndex').textContent = curIndex ? fmt2(curIndex) : '-';
     document.getElementById('fx52wIndex').textContent = avgIndex ? fmt2(avgIndex) : '-';
 
@@ -1533,14 +1590,18 @@ function renderFxCurrency(curUnit){
     }
   }
 
+  const chartCutoff = new Date();
+  chartCutoff.setDate(chartCutoff.getDate() - fxLookbackDays);
+  const windowed = sorted.filter(r => new Date(r.date) >= chartCutoff);
+
   if(fxChartInstance) fxChartInstance.destroy();
   fxChartInstance = new Chart(document.getElementById('fxChart'), {
     type:'line',
     data:{
-      labels: sorted.map(r => r.date),
+      labels: windowed.map(r => r.date),
       datasets:[{
         label:`${curUnit}/KRW`,
-        data: sorted.map(r => r.rate),
+        data: windowed.map(r => r.rate),
         borderColor:'#2DCC70',
         backgroundColor:'#2DCC7022',
         borderWidth:1.5,
@@ -1580,6 +1641,32 @@ document.getElementById('fxExcelBtn').addEventListener('click', () => {
   XLSX.utils.book_append_sheet(wb, ws, active);
   XLSX.writeFile(wb, `${active}_KRW_환율_${isoDate(new Date())}.xlsx`);
 });
+
+/* ---------- 환율 비교 기간 슬라이더 (52주 기본, 조정 가능) ---------- */
+function setFxPeriod(days){
+  days = Math.max(14, Math.min(364, Math.round(days)));
+  fxLookbackDays = days;
+  document.getElementById('fxPeriodSlider').value = days;
+  document.getElementById('fxPeriodDays').textContent = days;
+  document.getElementById('fxPeriodWeeks').textContent = Math.round(days / 7);
+  document.querySelectorAll('.fx-period-preset').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.days) === days);
+  });
+  if(fxLoaded){
+    const active = document.querySelector('#fxPills .pill.active')?.dataset.fx || 'USD';
+    renderFxCurrency(active);
+  }
+}
+document.getElementById('fxPeriodSlider').addEventListener('input', e => setFxPeriod(e.target.value));
+document.querySelectorAll('.fx-period-preset').forEach(btn => {
+  btn.addEventListener('click', () => setFxPeriod(Number(btn.dataset.days)));
+});
+// 마우스 스크롤(휠)로도 좌우(기간 증감) 조정 — 슬라이더 위에서 휠을 굴리면 기간이 바뀜
+document.getElementById('fxPeriodRow').addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = (e.deltaY > 0 || e.deltaX > 0) ? -7 : 7; // 한 스크롤당 1주일씩 조정
+  setFxPeriod(fxLookbackDays + delta);
+}, { passive: false });
 
 /* ============ 메인 처리 ============ */
 let lastQuoteResults = []; // 마지막으로 조회한 원본 시세 (오버라이드 재계산용, API 재호출 없이 재사용)
