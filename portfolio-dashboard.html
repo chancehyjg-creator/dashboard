@@ -1051,14 +1051,13 @@ const DEMO_DATA = [
   {계좌명:"ISA", 자산군:"국내ETF", 종목명:"TIGER 미국배당다우존스", 티커:"458730.KS", 수량:200, 통화:"KRW", 매입단가:11200, 매입일:"2024-03-20", 위험도:"안전", 세부자산:"배당ETF"},
   {계좌명:"해외주식1", 자산군:"해외주식", 종목명:"Apple", 티커:"AAPL", 수량:8, 통화:"USD", 매입단가:165, 매입일:"2024-01-15", 위험도:"위험", 세부자산:"개별주"},
   {계좌명:"해외주식2", 자산군:"해외주식", 종목명:"Microsoft", 티커:"MSFT", 수량:5, 통화:"USD", 매입단가:340, 매입일:"2024-04-05", 위험도:"위험", 세부자산:"개별주"},
-  {계좌명:"업비트", 자산군:"가상자산", 종목명:"Bitcoin", 티커:"BTC-USD", 수량:0.05, 통화:"USD", 매입단가:42000, 매입일:"2024-06-01", 위험도:"위험", 세부자산:"코인"},
 ];
 
 const CORS_PROXIES = [
-  u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  u => `https://api.cors.lol/url=${u}`,
+  u => `https://proxy.corsfix.com/?${u}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  u => `https://thingproxy.freeboard.io/fetch/${u}`,
 ];
 
 const FX_START_DATE = "2024-01-01";
